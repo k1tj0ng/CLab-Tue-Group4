@@ -94,6 +94,7 @@ void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*complet
 	serial_port->UART->CR1 |= USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
 }
 
+void SerialInputChar()
 
 void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
 
