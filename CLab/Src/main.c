@@ -38,12 +38,11 @@ void finished_transmission(uint32_t bytes_sent) {
 	}
 }
 
-uint8_t received_buffer[100]; // Buffer to store received data
-
 int main(void)
 {
-	uint8_t *string_to_send = "This is a string! this is $ another string\r\n";
-	uint8_t *terminating_char = "$";
+    uint8_t prompt[] = "Enter text (end with $):\r\n";
+    uint8_t terminating_char = '$';
+    uint8_t received_buffer[100]; // Buffer to store received data
 
 	//void (*completion_function)(uint32_t) = &finished_transmission;
 
@@ -51,7 +50,10 @@ int main(void)
 
 	/* Loop forever */
 	for(;;) {
-		SerialOutputString(string_to_send, &USART1_PORT);
-		SerialInputString(received_buffer, &USART1_PORT);
+		SerialOutputString(prompt, &USART1_PORT);
+		SerialInputString(received_buffer, terminating_char, &USART1_PORT);
+	}
+	for(i = 0; i < 99; i++){
+		printf("%s", received_buffer[i]);
 	}
 }
