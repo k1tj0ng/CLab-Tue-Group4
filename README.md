@@ -4,11 +4,14 @@
 ## Justin, Kit, Ribka, Sulfat
 
 ## Roles and Responbilities
-
-
+- **Justin:** Exercise 2: Serial Interfaces
+- **Kit:** Exercise 2: Serial Interfaces
+- **Ribka:** Exercise 3: Timer Interface
+- **Sulfat:** Exercise 1: Digital I/O
+- **Everyone contributed to Exercise 4: Integration.** 
 ## Project Overview
 
-## Exercise # - One Line Descriptor
+## Exercise 1 - Digital I/0
 
 ### Summary
 
@@ -22,7 +25,7 @@
 
 ### Notes
 
-## Exercise # - One Line Descriptor
+## Exercise 2 - Serial Interfaces
 
 ### Summary
 
@@ -36,7 +39,7 @@
 
 ### Notes
 
-## Exercise # - One Line Descriptor
+## Exercise 3 - Timer Interfaces
 
 ### Summary
 
@@ -50,7 +53,7 @@
 
 ### Notes
 
-## Exercise # - One Line Descriptor
+## Exercise 4 - Integration
 
 ### Summary
 
