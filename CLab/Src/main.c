@@ -38,9 +38,12 @@ void finished_transmission(uint32_t bytes_sent) {
 	}
 }
 
+uint8_t received_buffer[100]; // Buffer to store received data
+
 int main(void)
 {
-	uint8_t *string_to_send = "This is a string !\r\n";
+	uint8_t *string_to_send = "This is a string! this is $ another string\r\n";
+	uint8_t *terminating_char = "$";
 
 	//void (*completion_function)(uint32_t) = &finished_transmission;
 
@@ -49,5 +52,6 @@ int main(void)
 	/* Loop forever */
 	for(;;) {
 		SerialOutputString(string_to_send, &USART1_PORT);
+		SerialInputString(received_buffer, &USART1_PORT);
 	}
 }

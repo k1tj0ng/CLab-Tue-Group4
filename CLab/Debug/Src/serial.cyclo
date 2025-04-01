@@ -1,0 +1,5 @@
+../Src/serial.c:40:6:SerialInitialise	6
+../Src/serial.c:98:6:SerialOutputChar	2
+../Src/serial.c:108:6:SerialOutputString	2
+../Src/serial.c:121:9:SerialInputChar	2
+../Src/serial.c:130:6:SerialInputString	3
