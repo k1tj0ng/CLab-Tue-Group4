@@ -94,13 +94,6 @@ void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*complet
 	serial_port->UART->CR1 |= USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
 }
 
-void SerialInputChar() {
-	while((serial_port->UART->ISR & USART_ISR_TXE) == 0){
-	}
-
-
-}
-
 void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
 
 	while((serial_port->UART->ISR & USART_ISR_TXE) == 0){
@@ -123,5 +116,32 @@ void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 	serial_port->completion_function(counter);
 }
 
+char SerialInputChar(SerialPort *serial_port) {
+    // Wait until data is received
+    while((serial_port->UART->ISR & USART_ISR_RXNE) == 0) {}
 
+    // Return the received character
+    return (char)(serial_port->UART->RDR & 0xFF);
+}
 
+void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, SerialPort *serial_port) {
+    uint32_t index = 0;
+    char received_char;
+
+    while(index < max_length - 1) {
+        received_char = SerialInputChar(serial_port);
+
+        // Echo back (optional)
+        SerialOutputChar(received_char, serial_port);
+
+        // End on newline or carriage return
+        if(received_char == terminatingChar) {
+            break;
+        }
+
+        buffer[index++] = received_char;
+    }
+
+    // Null-terminate the string
+    buffer[index] = '\0';
+}

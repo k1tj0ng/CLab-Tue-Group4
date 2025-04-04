@@ -39,6 +39,10 @@ void SerialOutputChar(uint8_t, SerialPort *serial_port);
 // SerialOutputString - output a NULL TERMINATED string to the serial port
 // Input: pointer to a NULL-TERMINATED string (if not null terminated, there will be problems)
 void SerialOutputString(uint8_t *pt, SerialPort *serial_port);
+
+char SerialInputChar(SerialPort *serial_port);
+
+void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, SerialPort *serial_port);
  
  
 #endif
