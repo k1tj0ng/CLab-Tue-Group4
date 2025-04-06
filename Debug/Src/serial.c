@@ -41,14 +41,6 @@ SerialPort USART1_PORT = {USART1,
 // InitialiseSerial - Initialise the serial port
 // Input: baudRate is from an enumerated set
 
-// serial call back stuff
-#define RX_BUFFER_SIZE 128
-
-static char rx_buffer[RX_BUFFER_SIZE];
-static uint32_t rx_index = 0;
-static char rx_terminator = '\n';
-static SerialRxCallback user_rx_cb = NULL;
-
 void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*completion_function)(uint32_t)) {
 
 	serial_port->completion_function = completion_function;
@@ -156,39 +148,4 @@ void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, 
 
     // Null-terminate the string
     buffer[index] = '\0';
-}
-
-void SerialSetRxCallback(SerialRxCallback callback) {
-    user_rx_cb = callback;
-}
-
-void SerialEnableRxInterrupt(USART_TypeDef *USARTx, char terminatingChar) {
-    // Enable the USART1 Receive Interrupt
-    USARTx->CR1 |= USART_CR1_RXNEIE;  // Enable RXNE interrupt
-
-    // Configure NVIC to enable the USART1 IRQ (interrupt vector for USART1)
-    NVIC_EnableIRQ(USART1_IRQn);
-    NVIC_SetPriority(USART1_IRQn, 1);  // Set priority of USART1 IRQ (optional)
-}
-
-void USART1_IRQHandler(void) {
-    // Check if data is available in the receive register (RXNE flag is set)
-    if (USART1->ISR & USART_ISR_RXNE) {  // RXNE (Receive Not Empty) flag
-        char received_data = USART1->RDR;  // Read received data from RDR register
-
-        static char buffer[32];
-        static uint32_t index = 0;
-
-        // Store received data in buffer
-        buffer[index++] = received_data;
-
-        // If we receive the terminating character '@' or buffer is full, call callback
-        if (received_data == '@' || index >= sizeof(buffer) - 1) {
-            buffer[index] = '\0';  // Null-terminate the string
-            if (user_rx_cb) {  // Ensure callback is set
-                user_rx_cb(buffer, index);  // Call the callback function
-            }
-            index = 0;  // Reset index for next message
-        }
-    }
 }

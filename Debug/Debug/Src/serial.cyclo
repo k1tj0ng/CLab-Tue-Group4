@@ -1,10 +1,5 @@
-../Inc/core_cm4.h:1688:22:__NVIC_EnableIRQ	2
-../Inc/core_cm4.h:1816:22:__NVIC_SetPriority	2
-../Src/serial.c:52:6:SerialInitialise	6
-../Src/serial.c:109:6:SerialOutputChar	2
-../Src/serial.c:119:6:SerialOutputString	2
-../Src/serial.c:131:6:SerialInputChar	2
-../Src/serial.c:139:6:SerialInputString	3
-../Src/serial.c:161:6:SerialSetRxCallback	1
-../Src/serial.c:165:6:SerialEnableRxInterrupt	1
-../Src/serial.c:174:6:USART1_IRQHandler	5
+../Src/serial.c:44:6:SerialInitialise	6
+../Src/serial.c:101:6:SerialOutputChar	2
+../Src/serial.c:111:6:SerialOutputString	2
+../Src/serial.c:123:6:SerialInputChar	2
+../Src/serial.c:131:6:SerialInputString	3

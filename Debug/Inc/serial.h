@@ -45,11 +45,4 @@ char SerialInputChar(SerialPort *serial_port);
 
 void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, SerialPort *serial_port);
  
-// Serial call back stuff
-typedef void (*SerialRxCallback)(char* str, uint32_t len);  // RX complete callback
-
-void SerialSetRxCallback(SerialRxCallback cb);  // Register callback
-void SerialEnableRxInterrupt(USART_TypeDef *USARTx, char terminatingChar);
-void USART1_IRQHandler(void);  // ISR for USART1        // Set TX callback
-//
 #endif
