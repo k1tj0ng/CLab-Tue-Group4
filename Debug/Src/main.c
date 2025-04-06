@@ -17,13 +17,62 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+
+#include "serial.h"
+#include "stm32f303xc.h"
+
+void SerialEnableRxInterrupt(USART_TypeDef *USARTx, char terminator);
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-int main(void)
-{
-    /* Loop forever */
-	for(;;);
+
+void finished_transmission(uint32_t bytes_sent) {
+	// This function will be called after a transmission is complete
+
+//	volatile uint32_t test = 0;
+	// make a very simple delay
+	for (volatile uint32_t i = 0; i < 0x8ffff; i++) {
+		// waste time !
+	}
+}
+
+void OnRxComplete(char* str, uint32_t len) {
+	// Example: echo the received string back
+	SerialOutputString((uint8_t *)str, &USART1_PORT);
+
+	// Optional: print debug info over semihosting / debugger
+	printf("Received: %.*s\n", (int)len, str);
+
+
+	// You can also add parsing here if you're using command-based input
+	// e.g., if (strncmp(str, "LED ON", len) == 0) { ... }
+}
+
+int main(void) {
+//	uint8_t *string_to_send = "This is a string !\r\n";
+
+	//void (*completion_function)(uint32_t) = &finished_transmission;
+
+	SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
+
+	// Set the callback for receiving data
+	SerialSetRxCallback(OnRxComplete);
+
+	// Enable receiving interrupt and set the terminating character '@'
+	SerialEnableRxInterrupt(USART1, '@');
+
+	/* Loop forever */
+	for(;;) {
+////		Serial_PollRx(&USART1_PORT);
+//		char input[32];
+//		const char terminatingChar = '@';
+//
+//		SerialInputString(input, terminatingChar, sizeof(input), &USART1_PORT);
+//		SerialOutputString((uint8_t *)input, &USART1_PORT);
+	}
 }

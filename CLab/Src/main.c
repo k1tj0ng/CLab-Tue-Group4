@@ -38,21 +38,16 @@ void finished_transmission(uint32_t bytes_sent) {
 	}
 }
 
-void OnRxComplete(char* str, uint32_t len) {
-    printf("Received: %.*s\n", len, str);
-}
-
-int main(void) {
+int main(void)
+{
 //	uint8_t *string_to_send = "This is a string !\r\n";
 
 	//void (*completion_function)(uint32_t) = &finished_transmission;
 
 	SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
-	Serial_SetRxCallback(OnRxComplete);
 
 	/* Loop forever */
 	for(;;) {
-		Serial_PollRx(&USART1_PORT);
 		char input[32];
 		const char terminatingChar = '@';
 
