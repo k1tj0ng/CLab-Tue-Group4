@@ -44,5 +44,13 @@ char SerialInputChar(SerialPort *serial_port);
 
 void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, SerialPort *serial_port);
  
+// Callback function types
+typedef void (*SerialRxCallback)(char* str, uint32_t len);  // RX complete callback
+typedef void (*SerialTxCallback)(void);                     // TX complete callback
+
+// Public API
+void Serial_PollRx(SerialPort *por, char terminatingChar)                      // Poll for RX data
+void Serial_SetRxCallback(SerialRxCallback cb);             // Set RX callback
+void Serial_SetTxCallback(SerialTxCallback cb);             // Set TX callback
  
 #endif

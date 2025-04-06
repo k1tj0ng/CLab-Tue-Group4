@@ -145,3 +145,33 @@ void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, 
     // Null-terminate the string
     buffer[index] = '\0';
 }
+
+static SerialRxCallback user_rx_cb = NULL;  // Static RX callback pointer
+static SerialTxCallback user_tx_cb = NULL;  // Static TX callback pointer
+
+void SerialSetRxCallback(SerialRxCallback cb) {
+    user_rx_cb = cb;  // Register user's RX callback
+}
+
+void SerialSetTxCallback(SerialTxCallback cb) {
+    user_tx_cb = cb;  // Register user's TX callback
+}
+
+// Polling function (call in main loop)
+void Serial_PollRx(SerialPort *por, char terminatingChar) {
+    if ((port->UART->ISR & USART_ISR_RXNE)) {  // Check if data arrived
+        char c = port->UART->RDR;              // Read byte
+
+        // Store in buffer
+        rx_buffer[rx_index++] = c;
+
+        // Check for termination
+        if (c == terminatingChar || rx_index >= sizeof(rx_buffer) {
+            rx_buffer[rx_index] = '\0';         // Null-terminate
+            if (user_rx_cb) {
+                user_rx_cb(rx_buffer, rx_index);  // Trigger callback
+            }
+            rx_index = 0;                       // Reset buffer
+        }
+    }
+}
