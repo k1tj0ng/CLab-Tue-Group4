@@ -15,7 +15,7 @@
 - **Sulfat:** Exercise 1: Digital I/O
 - **Everyone contributed to Exercise 4: Integration.** 
 
----
+
 
 ## 🔍 Project Overview
 
