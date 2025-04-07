@@ -21,8 +21,10 @@
 #include <stdio.h>
 
 #include "serial.h"
+#include "timer.h"
 #include "stm32f303xc.h"
 #include "digital_io.h"
+#include "setup.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
@@ -57,4 +59,23 @@ int main(void)
 		SerialInputString(input, terminatingChar, sizeof(input), &USART1_PORT);
 		SerialOutputString((uint8_t *)input, &USART1_PORT);
 	}
+}
+
+
+void blink_leds(void) {
+	// This function will be called if there is a timer overflow
+    static uint8_t led_state = 0;
+    GPIOE->ODR = led_state ? 0xFF00 : 0x0000;  // Toggle LEDs on PE8-PE15
+    led_state = !led_state;  // Flip the state
+}
+
+int timerdemo(void) {
+    enable_clocks();
+    initialise_board();
+
+    // Timer that trigger the callback (blink LED) every x millisecond
+    timer_init(1000, blink_leds); // Input the time interval in millisecond
+
+    while (1) {
+    }
 }

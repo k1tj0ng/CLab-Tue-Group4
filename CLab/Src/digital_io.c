@@ -1,5 +1,6 @@
 #include "stm32f303xc.h"
 #include <stdint.h>
+#include "setup.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
@@ -22,22 +23,6 @@ void EXTI0_IRQHandler(void)
 	// reset the interrupt (so it doesn't keep firing until the next trigger)
 	EXTI->PR |= EXTI_PR_PR0;
 }
-
-
-// enable the clocks for desired peripherals (GPIOA, C and E)
-void enable_clocks() {
-	RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOCEN | RCC_AHBENR_GPIOEEN;
-	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-}
-
-
-// initialise the discovery board I/O (just outputs: inputs are selected by default)
-void initialise_board() {
-	// get a pointer to the second half word of the MODER register (for outputs pe8-15)
-	uint16_t *led_output_registers = ((uint16_t *)&(GPIOE->MODER)) + 1;
-	*led_output_registers = 0x5555;
-}
-
 
 void enable_interrupt() {
 	// Disable the interrupts while messing around with the settings
@@ -94,11 +79,11 @@ void enable_prescaler(int delay_value){
 	NVIC_EnableIRQ(TIM2_IRQn);             // Enable Timer 2 interrupt in NVIC
 	TIM2->ARR = delay_value;
 	__enable_irq();
-	TIM2_IRQHandler();
+	TIM2_IRQHandler_chaseled();
 
 }
 
-void TIM2_IRQHandler() {
+void TIM2_IRQHandler_chaseled() {
     if ((TIM2->SR & TIM_SR_UIF) !=0){
     		chase_led();					// Check if update interrupt
     }
