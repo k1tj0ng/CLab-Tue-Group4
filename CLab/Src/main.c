@@ -43,6 +43,8 @@ int main(void)
 //	uint8_t *string_to_send = "This is a string !\r\n";
 
 	//void (*completion_function)(uint32_t) = &finished_transmission;
+	enable_clocks();
+	initialise_board();
 
 	SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
 
