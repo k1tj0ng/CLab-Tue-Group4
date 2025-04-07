@@ -64,18 +64,24 @@ int main(void)
 
 void blink_leds(void) {
 	// This function will be called if there is a timer overflow
-    static uint8_t led_state = 0;
-    GPIOE->ODR = led_state ? 0xFF00 : 0x0000;  // Toggle LEDs on PE8-PE15
-    led_state = !led_state;  // Flip the state
+	static uint8_t led_state = 0;
+	GPIOE->ODR = led_state ? 0xFF00 : 0x0000;  // Toggle LEDs on PE8-PE15
+	led_state = !led_state;  // Flip the state
 }
 
 int timerdemo(void) {
-    enable_clocks();
-    initialise_board();
+	enable_clocks();
+	initialise_board();
+	
+	// Timer that triggers the callback (blink LED) every x millisecond
+	timer_init(1000, blink_leds); // Input the time interval in millisecond
+	
+	// Delay for a few seconds or do something
+	for (volatile int i = 0; i < 5000000; i++) {
+	}
+	
+	timer_reset(100);	// Change the interval
 
-    // Timer that trigger the callback (blink LED) every x millisecond
-    timer_init(1000, blink_leds); // Input the time interval in millisecond
-
-    while (1) {
-    }
+	while (1) {
+	}
 }
