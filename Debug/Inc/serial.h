@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include "stm32f303xc.h"
 
+// We store the pointers to the GPIO and USART that are used
+//  for a specific serial port. To add another serial port
+//  you need to select the appropriate values.
+
 struct _SerialPort {
 	USART_TypeDef *UART;
 	GPIO_TypeDef *GPIO;

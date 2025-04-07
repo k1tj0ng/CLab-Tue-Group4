@@ -3,10 +3,6 @@
 
 #include "stm32f303xc.h"
 
-// We store the pointers to the GPIO and USART that are used
-//  for a specific serial port. To add another serial port
-//  you need to select the appropriate values.
-
 // instantiate the serial port parameters
 //   note: the complexity is hidden in the c file
 SerialPort USART1_PORT = {USART1,

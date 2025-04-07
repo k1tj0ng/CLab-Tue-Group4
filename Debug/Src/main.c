@@ -19,18 +19,6 @@ void finished_transmission(uint32_t bytes_sent) {
 	}
 }
 
-// USART1 interrupt handler
-void USART1_IRQHandler(void) {
-    // Check if receive data register not empty flag is set
-    if (USART1->ISR & USART_ISR_RXNE) {
-        // Read the received character and pass to serial interrupt handler
-        uint8_t received_char = USART1->RDR;
-        SerialInterruptHandleRx(received_char);
-    }
-
-    // Add other UART interrupt handling if needed (e.g., TX complete)
-}
-
 void message_received(char *message, uint32_t length) {
     // Process the received message here
     SerialOutputString((uint8_t*)"Message received: ", &USART1_PORT);
@@ -40,31 +28,33 @@ void message_received(char *message, uint32_t length) {
 
 
 int main(void) {
-	  SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
+    // Initialize serial communication with 115200 baud rate
+    SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
 
-	    // Initialize interrupt-based reception with '@' as terminator
-	    SerialInterruptInit(&USART1_PORT, '@');
+    // Initialize interrupt-based reception without needing to pass the terminator
+    SerialInterruptInit(&USART1_PORT);
 
-	    // Optional: Set a callback for message processing
-	    SerialInterruptSetCallback(message_received);
+    // Optional: Set a callback for message processing
+    SerialInterruptSetCallback(message_received);
 
-	    // Send welcome message
-	    SerialOutputString((uint8_t*)"Serial system ready. Type a message ending with @\r\n", &USART1_PORT);
+    // Send welcome message
+    SerialOutputString((uint8_t*)"Serial system ready. Type a message ending with @\r\n", &USART1_PORT);
 
-	    char input[32];
+    char input[32];
 
-	    while (1) {
-	        // Method 1: Use polling to check for messages (for simple applications)
-	        if (SerialInterruptCheckMessage(input, sizeof(input))) {
-	            // Message received, echo it back
-	            SerialOutputString((uint8_t*)"\r\nPolling: You sent: ", &USART1_PORT);
-	            SerialOutputString((uint8_t*)input, &USART1_PORT);
-	            SerialOutputString((uint8_t*)"\r\n", &USART1_PORT);
-	        }
+    while (1) {
+        // Method 1: Use polling to check for messages (for simple applications)
+        if (SerialInterruptCheckMessage(input, sizeof(input))) {
+            // Message received, echo it back
+            SerialOutputString((uint8_t*)"\r\nPolling: You sent: ", &USART1_PORT);
+            SerialOutputString((uint8_t*)input, &USART1_PORT);
+            SerialOutputString((uint8_t*)"\r\n", &USART1_PORT);
+        }
 
-	        // Method 2: Use callbacks for message processing (set above)
-	        // This happens automatically when a message is received
+        // Method 2: Use callbacks for message processing (set above)
+        // This happens automatically when a message is received
 
-	        // Your main loop can do other work here
-	    }
-	}
+        // Your main loop can do other work here
+    }
+}
+

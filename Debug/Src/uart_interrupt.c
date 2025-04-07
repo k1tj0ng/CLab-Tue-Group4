@@ -5,21 +5,17 @@
 
 // Receive buffer and control variables
 #define RX_BUFFER_SIZE 128
-static volatile char rx_buffer[RX_BUFFER_SIZE];
-static volatile uint32_t rx_index = 0;
-static volatile uint8_t rx_complete = 0;
-static volatile char terminator_char = '@';
-static SerialPort *current_serial_port = NULL;
+static volatile char rx_buffer[RX_BUFFER_SIZE];  // Receive buffer
+static volatile uint32_t rx_index = 0;  // Index to track where to store the next byte
+static volatile uint8_t rx_complete = 0;  // Flag to indicate if data reception is complete
+static SerialPort *current_serial_port = NULL;  // Pointer to the current serial port
 
-// Optional callback function for when message is complete
-static void (*message_callback)(char*, uint32_t) = NULL;
+// Optional callback function for when data is received
+static void (*data_received_callback)(char*, uint32_t) = NULL;
 
-void SerialInterruptInit(SerialPort *serial_port, char terminator) {
+void SerialInterruptInit(SerialPort *serial_port) {
     // Store the serial port for later use
     current_serial_port = serial_port;
-
-    // Set the terminator character
-    terminator_char = terminator;
 
     // Reset buffer state
     rx_index = 0;
@@ -40,63 +36,43 @@ void SerialInterruptInit(SerialPort *serial_port, char terminator) {
     // }
 }
 
-void SerialInterruptSetTerminator(char terminator) {
-    terminator_char = terminator;
-}
-
 void SerialInterruptSetCallback(void (*rx_callback)(char*, uint32_t)) {
-    message_callback = rx_callback;
-}
-
-uint8_t SerialInterruptCheckMessage(char *buffer, uint32_t buffer_size) {
-    if (rx_complete) {
-        // Critical section - disable interrupts
-        __disable_irq();
-
-        // Copy data from the receive buffer to the output buffer
-        uint32_t len = (rx_index < buffer_size - 1) ? rx_index : buffer_size - 1;
-        memcpy(buffer, (const char*)rx_buffer, len);
-        buffer[len] = '\0'; // Ensure null termination
-
-        // Reset receive buffer
-        rx_index = 0;
-        rx_complete = 0;
-
-        // Re-enable interrupts
-        __enable_irq();
-
-        return 1; // Data was available
-    }
-
-    return 0; // No data available
+    data_received_callback = rx_callback;
 }
 
 // This function should be called from your IRQ handler in main.c
 void SerialInterruptHandleRx(uint8_t received_byte) {
-    char received_char = (char)received_byte;
-
     // Store the character in buffer if there's room
     if (rx_index < RX_BUFFER_SIZE - 1) {
-        rx_buffer[rx_index++] = received_char;
+        rx_buffer[rx_index++] = (char)received_byte;  // Store the byte in the buffer
 
-        // Echo character back to terminal if serial port is available
+        // Optionally echo character back to terminal if serial port is available
         if (current_serial_port != NULL) {
-            SerialOutputChar(received_char, current_serial_port);
+            SerialOutputChar((char)received_byte, current_serial_port);
         }
 
-        // Check if terminating character received
-        if (received_char == terminator_char) {
-            // Null terminate the string
-            rx_buffer[rx_index] = '\0';
-            rx_complete = 1;
-
-            // Call callback if registered
-            if (message_callback != NULL) {
-                message_callback((char*)rx_buffer, rx_index);
-            }
+        // Call the callback function if registered (for continuous data processing)
+        if (data_received_callback != NULL) {
+            data_received_callback((char*)rx_buffer, rx_index);  // Call callback with the current buffer
         }
     } else {
         // Buffer overflow - reset
         rx_index = 0;
     }
 }
+
+uint8_t SerialInterruptCheckMessage(char *buffer, uint32_t buffer_size) {
+    // This function may not be necessary anymore since you're processing data continuously
+    return 0;
+}
+
+// USART1 interrupt handler
+void USART1_IRQHandler(void) {
+    // Check if receive data register not empty flag is set
+    if (USART1->ISR & USART_ISR_RXNE) {
+        // Read the received character and process it
+        uint8_t received_char = USART1->RDR;
+        SerialInterruptHandleRx(received_char);  // Handle received byte
+    }
+}
+
