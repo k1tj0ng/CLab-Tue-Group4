@@ -31,6 +31,13 @@ void USART1_IRQHandler(void) {
     // Add other UART interrupt handling if needed (e.g., TX complete)
 }
 
+void message_received(char *message, uint32_t length) {
+    // Process the received message here
+    SerialOutputString((uint8_t*)"Message received: ", &USART1_PORT);
+    SerialOutputString((uint8_t*)message, &USART1_PORT);
+    SerialOutputString((uint8_t*)"\r\n", &USART1_PORT);
+}
+
 
 int main(void) {
 	  SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);

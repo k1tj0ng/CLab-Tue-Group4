@@ -1,4 +1,5 @@
 #include "uart_interrupt.h"
+#include "serial.h"
 #include "stm32f303xc.h"
 #include <string.h>
 

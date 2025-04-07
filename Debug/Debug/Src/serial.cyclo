@@ -1,5 +1,5 @@
-../Src/serial.c:42:6:SerialInitialise	6
-../Src/serial.c:99:6:SerialOutputChar	2
-../Src/serial.c:109:6:SerialOutputString	6
-../Src/serial.c:138:6:SerialInputChar	2
-../Src/serial.c:146:6:SerialInputString	3
+../Src/serial.c:28:6:SerialInitialise	6
+../Src/serial.c:85:6:SerialOutputChar	2
+../Src/serial.c:95:6:SerialOutputString	6
+../Src/serial.c:124:6:SerialInputChar	2
+../Src/serial.c:132:6:SerialInputString	3
