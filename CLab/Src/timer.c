@@ -6,18 +6,6 @@
 //Define the callback function
 static CallbackFunction timerCallback = NULL;
 
-// Enable the clocks for GPIO and TIM2
-void enable_clocks() {
-    RCC->AHBENR |= RCC_AHBENR_GPIOEEN;
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-}
-
-// Initialise the discovery board I/O
-void initialise_board() {
-    uint16_t *led_output_registers = ((uint16_t *)&(GPIOE->MODER)) + 1;
-    *led_output_registers = 0x5555;  // Set PE8-PE15 as output
-}
-
 // Timer interrupt handler for TIM2
 void TIM2_IRQHandler(void) {
     if (TIM2->SR & TIM_SR_UIF) {  // Check if the interrupt flag is raised
