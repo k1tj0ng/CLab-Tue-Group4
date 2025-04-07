@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stddef.h>  // Required for NULL definition
 #include "stm32f303xc.h"
+#include "serial.h"
 #include "system_stm32f3xx.h"
 
 // Callback function pointer (initialized to NULL)
@@ -14,6 +15,16 @@ static volatile uint32_t rx_position = 0;
 static volatile char terminator = '#';
 
 #define SystemCoreClock 72000000
+
+void finished_transmission(uint32_t bytes_sent) {
+	// This function will be called after a transmission is complete
+
+	volatile uint32_t test = 0;
+	// make a very simple delay
+	for (volatile uint32_t i = 0; i < 0x8ffff; i++) {
+		// waste time !
+	}
+}
 
 void USART1_IRQHandler(void) {
     // RX Handling
@@ -92,10 +103,11 @@ void OnDataReceived(char* str, uint32_t len) {
 }
 
 int main(void) {
-    UART_Init(115200);
+	SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
     UART_SetRxCallback(OnDataReceived, '#');
 
-    UART_SendString("System Ready. Send messages ending with #\r\n");
+    uint8_t *initialiseMessage = "System Ready. Send messages ending with #\r\n";
+    UART_SendString(initialiseMessage, &USART1_PORT);
 
     while (1) {
         // Main application

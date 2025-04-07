@@ -94,6 +94,13 @@ void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*complet
 	serial_port->UART->CR1 |= USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
 }
 
+void SerialInputChar() {
+	while((serial_port->UART->ISR & USART_ISR_TXE) == 0){
+	}
+
+
+}
+
 void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
 
 	while((serial_port->UART->ISR & USART_ISR_TXE) == 0){
@@ -116,14 +123,9 @@ void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 	serial_port->completion_function(counter);
 }
 
-char SerialInputChar(SerialPort *serial_port) {
-    // Wait until data is received
-    while((serial_port->UART->ISR & USART_ISR_RXNE) == 0) {}
 
-    // Return the received character
-    return (char)(serial_port->UART->RDR & 0xFF);
-}
 
+<<<<<<< HEAD
 void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, SerialPort *serial_port) {
     uint32_t index = 0;
     char received_char;
@@ -175,3 +177,5 @@ void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, 
 //        }
 //    }
 //}
+=======
+>>>>>>> parent of d41b7f4 (Task 2.3 a - kit)
