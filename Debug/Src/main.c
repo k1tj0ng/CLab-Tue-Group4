@@ -66,15 +66,22 @@ void UART_SetRxCallback(void (*callback)(char*, uint32_t), char term_char) {
     rx_position = 0;
 }
 
-void UART_SendChar(char c) {
-    while (!(USART1->ISR & USART_ISR_TXE));  // Wait for TXE (transmit buffer empty)
-    USART1->TDR = c;  // Send character
+void UART_SendChar(uint8_t data, SerialPort *serial_port) {
+	while((serial_port->UART->ISR & USART_ISR_TXE) == 0){
+		}
+
+		serial_port->UART->TDR = data;
 }
 
-void UART_SendString(const char* str) {
-    while (*str) {
-        UART_SendChar(*str++);
-    }
+void UART_SendString(uint8_t *pt, SerialPort *serial_port) {
+	uint32_t counter = 0;
+		while(*pt) {
+			SerialOutputChar(*pt, serial_port);
+			counter++;
+			pt++;
+		}
+
+		serial_port->completion_function(counter);
 }
 
 // Example callback

@@ -1,9 +1,0 @@
-../Inc/core_cm4.h:1688:22:__NVIC_EnableIRQ	16	static
-../Inc/core_cm4.h:1816:22:__NVIC_SetPriority	16	static
-../Src/main.c:18:6:USART1_IRQHandler	16	static
-../Src/main.c:43:6:UART_Init	16	static
-../Src/main.c:62:6:UART_SetRxCallback	16	static
-../Src/main.c:69:6:UART_SendChar	16	static
-../Src/main.c:74:6:UART_SendString	16	static
-../Src/main.c:81:6:OnDataReceived	16	static
-../Src/main.c:87:5:main	8	static
