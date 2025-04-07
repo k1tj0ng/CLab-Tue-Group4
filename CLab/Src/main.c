@@ -23,6 +23,7 @@
 #include "serial.h"
 #include "stm32f303xc.h"
 #include "digital_io.h"
+#include "setup.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
