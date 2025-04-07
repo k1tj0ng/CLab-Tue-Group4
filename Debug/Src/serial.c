@@ -112,9 +112,15 @@ void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 
 	uint32_t counter = 0;
 	SerialOutputChar('\n', serial_port);
-	while(*pt) {
-		SerialOutputChar(*pt, serial_port);
-		counter++;
+	while (*pt) {
+		// SerialOutputChar('\n', serial_port);
+		if (*pt != '\n' && *pt != '\r') {
+			SerialOutputChar(*pt, serial_port);
+			counter++;
+		}
+		else if (*pt == '\n'){
+			SerialOutputChar('\n', serial_port);
+		}
 		pt++;
 	}
 
