@@ -20,12 +20,15 @@ void finished_transmission(uint32_t bytes_sent) {
 
 int main(void) {
 	SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
+	UART_InterruptInit(USART1, '@');
 
     while (1) {
     	char input[32];
 		const char terminatingChar = '@';
 
-		SerialInputString(input, terminatingChar, sizeof(input), &USART1_PORT);
+		if(UART_DataAvailable()){
+		UART_GetReceivedData(input, sizeof(input));
 		SerialOutputString((uint8_t *)input, &USART1_PORT);
-    }
+		}
+	}
 }
