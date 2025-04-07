@@ -1,7 +1,7 @@
 #include "stm32f303xc.h"
 #include "timer.h"
 #include <stddef.h>
-
+#include "setup.h"
 
 //Define the callback function
 static CallbackFunction timerCallback = NULL;
