@@ -124,8 +124,6 @@ void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 }
 
 
-
-<<<<<<< HEAD
 void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, SerialPort *serial_port) {
     uint32_t index = 0;
     char received_char;
@@ -177,5 +175,3 @@ void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, 
 //        }
 //    }
 //}
-=======
->>>>>>> parent of d41b7f4 (Task 2.3 a - kit)
