@@ -30,3 +30,13 @@ void timer_init(uint32_t interval, CallbackFunction callback) {
     // Start the timer
     TIM2->CR1 |= TIM_CR1_CEN;
 }
+
+// Reset the timer with the new interval
+void timer_reset(uint32_t interval) {
+    TIM2->CNT = 0;         // Reset the timer counter
+    TIM2->ARR = interval;  // Reload the ARR register with the new interval
+    TIM2->CR1 |= TIM_CR1_CEN;
+
+    // Re-initialize the timer
+    timer_init(interval, timerCallback);
+}
