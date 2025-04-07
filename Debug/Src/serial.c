@@ -111,10 +111,21 @@ void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
 void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 
 	uint32_t counter = 0;
+	SerialOutputChar('\n', serial_port);
 	while(*pt) {
 		SerialOutputChar(*pt, serial_port);
 		counter++;
 		pt++;
+	}
+
+	char buffer[10];
+	sprintf(buffer, "%d", counter);
+	char *ptr = buffer;
+//	SerialOutputChar(*ptr, serial_port);
+
+	while (*ptr) {
+		SerialOutputChar(*ptr, serial_port);
+		ptr++;
 	}
 
 	serial_port->completion_function(counter);
