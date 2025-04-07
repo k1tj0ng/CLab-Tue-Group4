@@ -98,7 +98,7 @@ void enable_prescaler(int delay_value){
 
 }
 
-void TIM2_IRQHandler() {
+void TIM2_IRQHandler_chaseled() {
     if ((TIM2->SR & TIM_SR_UIF) !=0){
     		chase_led();					// Check if update interrupt
     }
