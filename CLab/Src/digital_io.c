@@ -76,7 +76,7 @@ void chase_led(){
 	}
 }
 
-void enable_prescaler(){
+void enable_prescaler(int delay_value){
 
 	TIM2->ARR = 0x01;
 	TIM2->CNT = 0x00;
@@ -92,7 +92,7 @@ void enable_prescaler(){
 	TIM2->DIER |= TIM_DIER_UIE;            // Enable update interrupt
     TIM2->CR1 |= TIM_CR1_CEN;              // Enable Timer 2
 	NVIC_EnableIRQ(TIM2_IRQn);             // Enable Timer 2 interrupt in NVIC
-	TIM2->ARR = delay;
+	TIM2->ARR = delay_value;
 	__enable_irq();
 	TIM2_IRQHandler();
 
