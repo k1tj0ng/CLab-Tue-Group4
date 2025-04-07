@@ -1,3 +1,4 @@
+"./Src/intergration.o"
 "./Src/main.o"
 "./Src/serial.o"
 "./Src/syscalls.o"

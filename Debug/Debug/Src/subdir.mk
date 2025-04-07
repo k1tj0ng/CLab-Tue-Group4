@@ -5,6 +5,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Src/intergration.c \
 ../Src/main.c \
 ../Src/serial.c \
 ../Src/syscalls.c \
@@ -12,6 +13,7 @@ C_SRCS += \
 ../Src/uart_interrupt.c 
 
 OBJS += \
+./Src/intergration.o \
 ./Src/main.o \
 ./Src/serial.o \
 ./Src/syscalls.o \
@@ -19,6 +21,7 @@ OBJS += \
 ./Src/uart_interrupt.o 
 
 C_DEPS += \
+./Src/intergration.d \
 ./Src/main.d \
 ./Src/serial.d \
 ./Src/syscalls.d \
@@ -33,7 +36,7 @@ Src/%.o Src/%.su Src/%.cyclo: ../Src/%.c Src/subdir.mk
 clean: clean-Src
 
 clean-Src:
-	-$(RM) ./Src/main.cyclo ./Src/main.d ./Src/main.o ./Src/main.su ./Src/serial.cyclo ./Src/serial.d ./Src/serial.o ./Src/serial.su ./Src/syscalls.cyclo ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.cyclo ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su ./Src/uart_interrupt.cyclo ./Src/uart_interrupt.d ./Src/uart_interrupt.o ./Src/uart_interrupt.su
+	-$(RM) ./Src/intergration.cyclo ./Src/intergration.d ./Src/intergration.o ./Src/intergration.su ./Src/main.cyclo ./Src/main.d ./Src/main.o ./Src/main.su ./Src/serial.cyclo ./Src/serial.d ./Src/serial.o ./Src/serial.su ./Src/syscalls.cyclo ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.cyclo ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su ./Src/uart_interrupt.cyclo ./Src/uart_interrupt.d ./Src/uart_interrupt.o ./Src/uart_interrupt.su
 
 .PHONY: clean-Src
 
