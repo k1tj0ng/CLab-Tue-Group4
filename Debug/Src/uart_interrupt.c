@@ -1,47 +1,101 @@
 #include "uart_interrupt.h"
+#include "stm32f303xc.h"
+#include <string.h>
 
-static volatile char uart_buffer[UART_BUFFER_SIZE];
-static volatile uint32_t buffer_index = 0;
-static volatile bool data_ready = false;
-static char term_char;
+// Receive buffer and control variables
+#define RX_BUFFER_SIZE 128
+static volatile char rx_buffer[RX_BUFFER_SIZE];
+static volatile uint32_t rx_index = 0;
+static volatile uint8_t rx_complete = 0;
+static volatile char terminator_char = '@';
+static SerialPort *current_serial_port = NULL;
 
-void UART_InterruptInit(USART_TypeDef *UART, char terminating_char) {
-    term_char = terminating_char;
+// Optional callback function for when message is complete
+static void (*message_callback)(char*, uint32_t) = NULL;
 
-    // Enable USART RXNE interrupt
-    UART->CR1 |= USART_CR1_RXNEIE;
+void SerialInterruptInit(SerialPort *serial_port, char terminator) {
+    // Store the serial port for later use
+    current_serial_port = serial_port;
 
-    // Enable USART global interrupt in NVIC (USART1_IRQn for USART1)
-    NVIC_EnableIRQ(USART1_IRQn);  // Adjust this for other UARTs if needed
+    // Set the terminator character
+    terminator_char = terminator;
+
+    // Reset buffer state
+    rx_index = 0;
+    rx_complete = 0;
+
+    // Enable RXNE interrupt (Receive register not empty)
+    serial_port->UART->CR1 |= USART_CR1_RXNEIE;
+
+    // Enable USART interrupt in NVIC
+    if (serial_port->UART == USART1) {
+        NVIC_SetPriority(USART1_IRQn, 3);
+        NVIC_EnableIRQ(USART1_IRQn);
+    }
+    // Add more UARTs as needed:
+    // else if (serial_port->UART == USART2) {
+    //     NVIC_SetPriority(USART2_IRQn, 3);
+    //     NVIC_EnableIRQ(USART2_IRQn);
+    // }
 }
 
-// Interrupt handler for USART1
-void USART1_IRQHandler(void) {
-    if ((USART1->ISR & USART_ISR_RXNE) && !(USART1->CR1 & USART_CR1_OVER8)) {
-        char received = (char)(USART1->RDR & 0xFF);
+void SerialInterruptSetTerminator(char terminator) {
+    terminator_char = terminator;
+}
 
-        if (!data_ready && buffer_index < UART_BUFFER_SIZE - 1) {
-            uart_buffer[buffer_index++] = received;
+void SerialInterruptSetCallback(void (*rx_callback)(char*, uint32_t)) {
+    message_callback = rx_callback;
+}
 
-            if (received == term_char) {
-                uart_buffer[buffer_index] = '\0';
-                data_ready = true;
+uint8_t SerialInterruptCheckMessage(char *buffer, uint32_t buffer_size) {
+    if (rx_complete) {
+        // Critical section - disable interrupts
+        __disable_irq();
+
+        // Copy data from the receive buffer to the output buffer
+        uint32_t len = (rx_index < buffer_size - 1) ? rx_index : buffer_size - 1;
+        memcpy(buffer, (const char*)rx_buffer, len);
+        buffer[len] = '\0'; // Ensure null termination
+
+        // Reset receive buffer
+        rx_index = 0;
+        rx_complete = 0;
+
+        // Re-enable interrupts
+        __enable_irq();
+
+        return 1; // Data was available
+    }
+
+    return 0; // No data available
+}
+
+// This function should be called from your IRQ handler in main.c
+void SerialInterruptHandleRx(uint8_t received_byte) {
+    char received_char = (char)received_byte;
+
+    // Store the character in buffer if there's room
+    if (rx_index < RX_BUFFER_SIZE - 1) {
+        rx_buffer[rx_index++] = received_char;
+
+        // Echo character back to terminal if serial port is available
+        if (current_serial_port != NULL) {
+            SerialOutputChar(received_char, current_serial_port);
+        }
+
+        // Check if terminating character received
+        if (received_char == terminator_char) {
+            // Null terminate the string
+            rx_buffer[rx_index] = '\0';
+            rx_complete = 1;
+
+            // Call callback if registered
+            if (message_callback != NULL) {
+                message_callback((char*)rx_buffer, rx_index);
             }
         }
-    }
-}
-
-bool UART_DataAvailable(void) {
-    return data_ready;
-}
-
-void UART_GetReceivedData(char *dest_buffer, uint32_t max_length) {
-    if (data_ready) {
-        for (uint32_t i = 0; i < buffer_index && i < max_length - 1; i++) {
-            dest_buffer[i] = uart_buffer[i];
-        }
-        dest_buffer[buffer_index] = '\0';
-        buffer_index = 0;
-        data_ready = false;
+    } else {
+        // Buffer overflow - reset
+        rx_index = 0;
     }
 }

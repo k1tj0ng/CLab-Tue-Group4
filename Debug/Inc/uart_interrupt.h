@@ -3,12 +3,16 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <serial.h>
 #include "stm32f303xc.h"
 
-#define UART_BUFFER_SIZE 128
+void SerialInterruptInit(SerialPort *serial_port, char terminator);
 
-void UART_InterruptInit(USART_TypeDef *UART, char terminating_char);
-bool UART_DataAvailable(void);
-void UART_GetReceivedData(char *dest_buffer, uint32_t max_length);
+uint8_t SerialInterruptCheckMessage(char *buffer, uint32_t buffer_size);
 
-#endif // UART_INTERRUPT_H
+void SerialInterruptSetTerminator(char terminator);
+
+// Register a callback function to be called when a complete message is received
+void SerialInterruptSetCallback(void (*rx_callback)(char*, uint32_t));
+
+#endif /* SERIAL_INTERRUPT */
