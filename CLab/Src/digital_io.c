@@ -94,7 +94,7 @@ void enable_prescaler(int delay_value){
 	NVIC_EnableIRQ(TIM2_IRQn);             // Enable Timer 2 interrupt in NVIC
 	TIM2->ARR = delay_value;
 	__enable_irq();
-	TIM2_IRQHandler();
+	TIM2_IRQHandler_chaseled();
 
 }
 
