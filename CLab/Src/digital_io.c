@@ -24,18 +24,6 @@ void EXTI0_IRQHandler(void)
 	EXTI->PR |= EXTI_PR_PR0;
 }
 
-
-
-
-
-// initialise the discovery board I/O (just outputs: inputs are selected by default)
-void initialise_board() {
-	// get a pointer to the second half word of the MODER register (for outputs pe8-15)
-	uint16_t *led_output_registers = ((uint16_t *)&(GPIOE->MODER)) + 1;
-	*led_output_registers = 0x5555;
-}
-
-
 void enable_interrupt() {
 	// Disable the interrupts while messing around with the settings
 	//  otherwise can lead to strange behaviour
