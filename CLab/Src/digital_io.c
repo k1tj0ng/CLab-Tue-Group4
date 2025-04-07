@@ -1,5 +1,6 @@
 #include "stm32f303xc.h"
 #include <stdint.h>
+#include "setup.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
@@ -24,11 +25,7 @@ void EXTI0_IRQHandler(void)
 }
 
 
-// enable the clocks for desired peripherals (GPIOA, C and E)
-void enable_clocks() {
-	RCC->AHBENR |= RCC_AHBENR_GPIOAEN | RCC_AHBENR_GPIOCEN | RCC_AHBENR_GPIOEEN;
-	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-}
+
 
 
 // initialise the discovery board I/O (just outputs: inputs are selected by default)
