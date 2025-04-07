@@ -59,8 +59,8 @@ all: main-build
 main-build: Debug.elf secondary-outputs
 
 # Tool invocations
-Debug.elf Debug.map: $(OBJS) $(USER_OBJS) /Users/kj/Documents/GitHub/CLab-Tue-Group4/Debug/STM32F303VCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Debug.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/kj/Documents/GitHub/CLab-Tue-Group4/Debug/STM32F303VCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Debug.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Debug.elf Debug.map: $(OBJS) $(USER_OBJS) C:\Users\ROG\Documents\GitHub\CLab-Tue-Group4\Debug\STM32F303VCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Debug.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\ROG\Documents\GitHub\CLab-Tue-Group4\Debug\STM32F303VCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Debug.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
