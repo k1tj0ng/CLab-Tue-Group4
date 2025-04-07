@@ -1,8 +1,6 @@
 #include "serial.h"
 #include <stddef.h>
 
-
-
 #include "stm32f303xc.h"
 
 // We store the pointers to the GPIO and USART that are used
@@ -155,7 +153,7 @@ void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, 
         // Echo back (optional)
         SerialOutputChar(received_char, serial_port);
 
-        // End on newline or carriage return
+        // End on newline or  svcarriage return
         if(received_char == terminatingChar) {
             break;
         }
