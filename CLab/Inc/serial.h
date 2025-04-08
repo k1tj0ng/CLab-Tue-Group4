@@ -39,15 +39,11 @@ void SerialOutputChar(uint8_t, SerialPort *serial_port);
 // SerialOutputString - output a NULL TERMINATED string to the serial port
 // Input: pointer to a NULL-TERMINATED string (if not null terminated, there will be problems)
 void SerialOutputString(uint8_t *pt, SerialPort *serial_port);
- 
- 
-// Callback function types
-//typedef void (*SerialRxCallback)(char* str, uint32_t len);  // RX complete callback
-//typedef void (*SerialTxCallback)(void);                     // TX complete callback
-//
-//// Public API
-//void Serial_PollRx(SerialPort *por, char terminatingChar)                      // Poll for RX data
-//void Serial_SetRxCallback(SerialRxCallback cb);             // Set RX callback
-//void Serial_SetTxCallback(SerialTxCallback cb);             // Set TX callback
-//
+
+#define BUFFER 32
+unsigned char string[BUFFER];
+unsigned char TERMINATING_CHAR = '#';
+int i = 0;
+int str_len = 0;
+
 #endif
