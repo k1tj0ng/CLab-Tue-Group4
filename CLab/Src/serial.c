@@ -115,3 +115,38 @@ void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 
 	serial_port->completion_function(counter);
 }
+
+
+uint8_t SerialInputChar(SerialPort *serial_port) {
+    // Wait until data is received
+    while((serial_port->UART->ISR & USART_ISR_RXNE) == 0) {
+    }
+
+    // Read and return the received data
+    return (uint8_t)serial_port->UART->RDR;
+}
+
+void SerialInputString(uint8_t *buffer, uint8_t terminator, SerialPort *serial_port) {
+    uint32_t counter = 0;
+    uint8_t received_char;
+
+    do {
+        // Read one character
+        received_char = SerialInputChar(serial_port);
+
+        // Store it in the buffer
+        buffer[counter] = received_char;
+        counter++;
+
+        // Check if we've received the terminator
+    } while(received_char != terminator);
+
+    // Add null terminator to make it a proper C string
+    buffer[counter] = '\0';
+
+    // Call completion function if one exists
+    if(serial_port->completion_function != 0) {
+        serial_port->completion_function(counter);
+    }
+}
+
