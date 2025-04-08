@@ -1,54 +1,49 @@
 #include "handler.h"
 #include "stm32f303xc.h"
 #include <serial.h>
+#include <string.h>
 
-void USART1_EXTI25_IRQHandler() {
-	// Check for overrun or frame errors
-	if ((USART1->ISR & USART_ISR_FE_Msk) && (USART1->ISR & USART_ISR_ORE_Msk))
-	{
-		return;
-	}
 
-	// If we have stored the maximum amount, stop
-	if (i == BUFFER)
-	{
-		i = 0;
-		memset((void*)strings[activeIndex], 0, BUFFER); // Clear corrupted buffer
-		return;
-	}
+// Global variables (volatile for ISR safety)
+volatile uint16_t writePos = 0;       // Current write position
+volatile bool bufferReady = false;     // Data ready flag
 
-	if (USART1->ISR & USART_ISR_RXNE_Msk) {
-		unsigned char data = (uint8_t) USART1->RDR;
-		str_len++;
+void USART1_EXTI25_IRQHandler(void) {
+    // Check for errors first (clears them automatically on read)
+    if (USART1->ISR & (USART_ISR_FE | USART_ISR_ORE)) {
+        USART1->ICR |= USART_ICR_FECF | USART_ICR_ORECF; // Clear flags
+        return;
+    }
 
-		if (data == '\n') {
-			SerialOutputString((uint8_t*)"\n", &USART1_PORT);
-			sortingOutInput((char (*)[BUFFER])strings);
-			readyIndex = activeIndex;
-			activeIndex ^= 1;
+    // Only handle RX not empty interrupt
+    if (USART1->ISR & USART_ISR_RXNE) {
+        uint8_t data = (uint8_t)(USART1->RDR & 0xFF);
 
-			 memset((void*)strings[activeIndex], 0, BUFFER); // Clear new active buffer
-			i = 0;
+        // Handle buffer overflow
+        if (writePos >= BUFFER - 1) {
+            writePos = 0;
+            memset((void*)strings[activeIndex], 0, BUFFER);
+            return;
+        }
 
-			// Buffer indicator checker
-//			char bufferIndicator[10];
-//			sprintf(bufferIndicator, "%d", activeIndex);
-//			SerialOutputString((uint8_t*)bufferIndicator, &USART1_PORT);
+        // Echo back (optional)
+        SerialOutputChar(data, &USART1_PORT);
 
-//			str_len = 0;
-		} else if (data == TERMINATING_CHAR) {
-			str_len--;
+        if (data == '\n' || data == '\r') {
+            // Terminate string and mark buffer ready
+            strings[activeIndex][writePos] = '\0';
+            bufferReady = 1;
 
-			SerialOutputString((uint8_t*)"The length is: ", &USART1_PORT);
+            // Swap buffers
+            readyIndex = activeIndex;
+            activeIndex ^= 1;
+            writePos = 0;
 
-			char strLenBuffer[10];
-			sprintf(strLenBuffer, "%d", str_len);
-
-			SerialOutputString((uint8_t*)strLenBuffer, &USART1_PORT);
-			SerialOutputString((uint8_t*)"\n", &USART1_PORT);
-		} else {
-			SerialOutputChar((uint8_t *)data, &USART1_PORT);
-			strings[activeIndex][i++] = data;
-			}
-		}
-	}
+            // Clear new active buffer
+            memset((void*)strings[activeIndex], 0, BUFFER);
+        } else {
+            // Store regular character
+            strings[activeIndex][writePos++] = data;
+        }
+    }
+}

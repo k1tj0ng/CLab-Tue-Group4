@@ -26,6 +26,7 @@
 #include "timer.h"
 #include "digital_io.h"
 #include "setup.h"
+#include "integration.h"
 
 #include "handler.h"
 #include "interrupts.h"
@@ -55,10 +56,13 @@ int main(void)
 
 	/* Loop forever */
 	for(;;) {
+		if (bufferReady) {
+		        sortingOutInput((char (*)[BUFFER])strings, readyIndex);
+		        bufferReady = 0;
 //		SerialOutputString(string_to_send, &USART1_PORT);
 	}
 }
-
+}
 
 void blink_leds(void) {
 	// This function will be called if there is a timer overflow
@@ -70,14 +74,14 @@ void blink_leds(void) {
 int timerdemo(void) {
 	enable_clocks();
 	initialise_board();
-	
+
 	// Timer that triggers the callback (blink LED) every x millisecond
 	timer_init(1000, blink_leds); // Input the time interval in millisecond
-	
+
 	// Delay for a few seconds or do something
 	for (volatile int i = 0; i < 5000000; i++) {
 	}
-	
+
 	timer_reset(100);	// Change the interval
 
 	while (1) {

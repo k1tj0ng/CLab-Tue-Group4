@@ -3,6 +3,6 @@
 
 #include "serial.h"
 
-void sortingOutInput(char strings[][BUFFER]);
+void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex);
 
 #endif
