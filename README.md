@@ -38,12 +38,18 @@
 ## Exercise 2 - Serial Interfaces
 
 ### Summary
+This exercise involves using the UART ports to receive and transmit data. It has a similar concept with the assembly code but using C allows us to use a different approach to check the data registers through the use of interrupts. Unlike polling, which loops to check the register values, these interrupts allows us to sort of multitask by pausing its current work and jumps into a specific function (ISR). In this exercise, we set the interrupt condition to be whenever we receive a data in the UART (USART_CR1_RXNEIE bit is set). It will then jump into a function to output what it receives, along with the length of the data.
 
 ### Usage
 
 ### Valid input
 
 ### Functions and modularity
+
+#### 1. Interrupts
+
+
+#### 2. Outputs
 
 ### Testing
 
