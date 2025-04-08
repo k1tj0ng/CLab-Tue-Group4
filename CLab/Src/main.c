@@ -21,7 +21,10 @@
 #include <stdio.h>
 
 #include "serial.h"
+#include "timer.h"
 #include "stm32f303xc.h"
+#include "digital_io.h"
+#include "setup.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
@@ -43,11 +46,38 @@ int main(void)
 	uint8_t *string_to_send = "This is a string !\r\n";
 
 	//void (*completion_function)(uint32_t) = &finished_transmission;
+	enable_clocks();
+	initialise_board();
 
 	SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
 
 	/* Loop forever */
 	for(;;) {
 		SerialOutputString(string_to_send, &USART1_PORT);
+	}
+}
+
+
+void blink_leds(void) {
+	// This function will be called if there is a timer overflow
+	static uint8_t led_state = 0;
+	GPIOE->ODR = led_state ? 0xFF00 : 0x0000;  // Toggle LEDs on PE8-PE15
+	led_state = !led_state;  // Flip the state
+}
+
+int timerdemo(void) {
+	enable_clocks();
+	initialise_board();
+	
+	// Timer that triggers the callback (blink LED) every x millisecond
+	timer_init(1000, blink_leds); // Input the time interval in millisecond
+	
+	// Delay for a few seconds or do something
+	for (volatile int i = 0; i < 5000000; i++) {
+	}
+	
+	timer_reset(100);	// Change the interval
+
+	while (1) {
 	}
 }
