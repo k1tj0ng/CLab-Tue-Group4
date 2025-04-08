@@ -5,24 +5,6 @@
 #include <stdint.h>
 #include "stm32f303xc.h"
 
-// We store the pointers to the GPIO and USART that are used
-//  for a specific serial port. To add another serial port
-//  you need to select the appropriate values.
-
-struct _SerialPort {
-	USART_TypeDef *UART;
-	GPIO_TypeDef *GPIO;
-	volatile uint32_t MaskAPB2ENR;	// mask to enable RCC APB2 bus registers
-	volatile uint32_t MaskAPB1ENR;	// mask to enable RCC APB1 bus registers
-	volatile uint32_t MaskAHBENR;	// mask to enable RCC AHB bus registers
-	volatile uint32_t SerialPinModeValue;
-	volatile uint32_t SerialPinSpeedValue;
-	volatile uint32_t SerialPinAlternatePinValueLow;
-	volatile uint32_t SerialPinAlternatePinValueHigh;
-	void (*completion_function)(uint32_t);
-};
-
-
 // Defining the serial port struct, the definition is hidden in the
 // c file as no one really needs to know this.
 struct _SerialPort;

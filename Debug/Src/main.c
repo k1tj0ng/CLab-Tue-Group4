@@ -2,12 +2,67 @@
 #include <stddef.h>  // Required for NULL definition
 #include "stm32f303xc.h"
 #include "serial.h"
-#include "uart_interrupt.h"
+//#include "uart_interrupt.h"
 #include "system_stm32f3xx.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
 #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
+
+volatile void (*on_usart1_receive)(char c) = NULL;
+
+//void USART1_IRQHandler() {
+//	SerialOutputString((uint8_t*)"Interrupt working yay\r\n", &USART1_PORT);
+//    // Check if RXNE flag is set (data received)
+//	if ((USART1->ISR & USART_ISR_RXNE) != 0) {
+//	        char received_char = USART1->RDR;  // Reading clears RXNE
+//
+//	        if ((USART1->ISR & (USART_ISR_FE | USART_ISR_ORE)) == 0) {
+//	            if (on_usart1_receive != NULL) {
+//	                on_usart1_receive(received_char);
+//	            }
+//	        }
+//	    } else {
+//    	USART1 -> CR1 = 0;
+//    	USART1 -> CR1 |= USART_CR1_RXNEIE | USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
+//    }
+//
+//    USART1 -> ISR &= ~USART_ISR_RXNE;
+//    USART1 -> CR1 |= USART_RQR_RXFRQ;
+//}
+
+void USART1_IRQHandler() {
+    SerialOutputString((uint8_t*)"Interrupt working yay\r\n", &USART1_PORT);
+
+    // Check if RXNE flag is set (data received)
+    if (USART1->ISR & USART_ISR_RXNE) {
+            // Read the received data (this clears the RXNE flag)
+            uint8_t received_data = (uint8_t)(USART1->RDR & 0xFF);
+
+            // Do something with the received data
+            // For example, echo it back:
+            USART1->TDR = received_data;
+
+            // Or process it in some way
+        }
+
+
+    // No need to clear RXNE manually or reset anything else
+}
+
+void enable_usart1_interrupt(void) {
+    __disable_irq();
+
+    SerialOutputString((uint8_t*)"Interrupt is working right now!\r\n", &USART1_PORT);
+
+    NVIC_SetPriority(USART1_IRQn, 1);
+    NVIC_EnableIRQ(USART1_IRQn);
+
+    // RXNEIE should already be set in SerialInitialise or CR1 |= later
+    USART1->CR1 |= USART_CR1_RXNEIE;
+
+    __enable_irq();
+}
 
 void finished_transmission(uint32_t bytes_sent) {
 	// This function will be called after a transmission is complete
@@ -19,42 +74,39 @@ void finished_transmission(uint32_t bytes_sent) {
 	}
 }
 
-void message_received(char *message, uint32_t length) {
-    // Process the received message here
-    SerialOutputString((uint8_t*)"Message received: ", &USART1_PORT);
-    SerialOutputString((uint8_t*)message, &USART1_PORT);
-    SerialOutputString((uint8_t*)"\r\n", &USART1_PORT);
+//void (*on_usart1_receive)(char c) = 0x00;
+
+void handle_received_char(char c) {
+    // Do something with the character (e.g., echo it back)
+    SerialOutputChar(c, &USART1_PORT);
+
+    // Or store it, process it, etc.
 }
 
 
 int main(void) {
     // Initialize serial communication with 115200 baud rate
-    SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
+    SerialInitialise(BAUD_115200, &USART1_PORT, 0x00);
 
     // Initialize interrupt-based reception without needing to pass the terminator
-    SerialInterruptInit(&USART1_PORT);
+//    USART1->CR1 |= USART_CR1_RXNEIE;
+//    __disable_irq();
+//
+//    NVIC_EnableIRQ(USART1_IRQn);
+//    NVIC_SetPriority(USART1_IRQn, 1);
 
-    // Optional: Set a callback for message processing
-    SerialInterruptSetCallback(message_received);
+//    SerialInterruptInit(&USART1_PORT);
+
+//    SerialInterruptSetReceiveCallback(on_usart1_receive);
 
     // Send welcome message
+
+    on_usart1_receive = handle_received_char;
+
     SerialOutputString((uint8_t*)"Serial system ready. Type a message ending with @\r\n", &USART1_PORT);
 
-    char input[32];
+    enable_usart1_interrupt();
 
-    while (1) {
-        // Method 1: Use polling to check for messages (for simple applications)
-        if (SerialInterruptCheckMessage(input, sizeof(input))) {
-            // Message received, echo it back
-            SerialOutputString((uint8_t*)"\r\nPolling: You sent: ", &USART1_PORT);
-            SerialOutputString((uint8_t*)input, &USART1_PORT);
-            SerialOutputString((uint8_t*)"\r\n", &USART1_PORT);
-        }
 
-        // Method 2: Use callbacks for message processing (set above)
-        // This happens automatically when a message is received
-
-        // Your main loop can do other work here
-    }
+    while (1) {}
 }
-

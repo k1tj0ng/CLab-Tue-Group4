@@ -3,6 +3,23 @@
 
 #include "stm32f303xc.h"
 
+// We store the pointers to the GPIO and USART that are used
+//  for a specific serial port. To add another serial port
+//  you need to select the appropriate values.
+
+struct _SerialPort {
+	USART_TypeDef *UART;
+	GPIO_TypeDef *GPIO;
+	volatile uint32_t MaskAPB2ENR;	// mask to enable RCC APB2 bus registers
+	volatile uint32_t MaskAPB1ENR;	// mask to enable RCC APB1 bus registers
+	volatile uint32_t MaskAHBENR;	// mask to enable RCC AHB bus registers
+	volatile uint32_t SerialPinModeValue;
+	volatile uint32_t SerialPinSpeedValue;
+	volatile uint32_t SerialPinAlternatePinValueLow;
+	volatile uint32_t SerialPinAlternatePinValueHigh;
+	void (*completion_function)(uint32_t);
+};
+
 // instantiate the serial port parameters
 //   note: the complexity is hidden in the c file
 SerialPort USART1_PORT = {USART1,
@@ -16,7 +33,6 @@ SerialPort USART1_PORT = {USART1,
 		0x00, // no change to the high alternate function register
 		0x00 // default function pointer is NULL
 		};
-
 
 // InitialiseSerial - Initialise the serial port
 // Input: baudRate is from an enumerated set
@@ -54,19 +70,19 @@ void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*complet
 	switch(baudRate){
 	case BAUD_9600:
 		// NEED TO FIX THIS !
-		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		*baud_rate_config = 840;  // 115200 at 8MHz
 		break;
 	case BAUD_19200:
 		// NEED TO FIX THIS !
-		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		*baud_rate_config = 420;  // 115200 at 8MHz
 		break;
 	case BAUD_38400:
 		// NEED TO FIX THIS !
-		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		*baud_rate_config = 210;  // 115200 at 8MHz
 		break;
 	case BAUD_57600:
 		// NEED TO FIX THIS !
-		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		*baud_rate_config = 140;  // 115200 at 8MHz
 		break;
 	case BAUD_115200:
 		*baud_rate_config = 0x46;  // 115200 at 8MHz
