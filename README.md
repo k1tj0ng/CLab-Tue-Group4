@@ -18,7 +18,7 @@
 
 
 ## 🔍 Project Overview
-
+Using C to interact with the microcontroller.
 
 
 ## Exercise 1 - Digital I/0
@@ -185,12 +185,40 @@ To start, set up the serial terminal emulator and connect it with your microcont
 ## Exercise 4 - Integration
 
 ### Summary
+Using the previous exercises, the integration task focuses on combining all the modules to develop a program that can perform several functions, depending on the user input to the serial port. There are several pre-defined commands that the user can type into the serial port such as, 'led 10001010', 'serial This transmits the strings back', 'oneshot 1000', and 'timer 1000'. We will look at this in more detail. We can also think of this like calling a function with custom parameters through the serial port. The program checks for which function is to be called with the use of a case switch block.
 
 ### Usage
+The user should type a string with 2 parts, first being the function name and second being the function value (parameters). It is then received by the UART receive module. The program will then extract the first part of the string and checks which function to be called and passes on the parameters which is the second part of the string.
+Both parts of the strings will be stores in seperate buffers to be passed/called by the following functions.
+
+#### 1. LED 
+Taking the values from the second part of the string, i.e. 10001010, the function should output LEDs with the given pattern value. 
+```
+code in here
+```
+
+#### 2. Serial
+From exercise 2, the "serial" comand will transmit the string back over the serial port. 
+```
+code in here
+```
+
+#### 3. Oneshot
+
+
+#### 4. Timer
 
 ### Valid input
+- The input by the user should have 2 parts.
+- The first part must be in lower case.
+- The second part must correspond to the parameters of the function to be called.
 
 ### Functions and modularity
+#### 1. Enable Interrupts
+#### 2. Interrupt Handlers
+#### 3. LEDs Registers
+#### 4. Serial Registers
+#### 5. Timers Registers
 
 ### Testing
 
