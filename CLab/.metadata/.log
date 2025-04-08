@@ -1,0 +1,70 @@
+!SESSION 2025-04-01 15:56:05.803 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_AU
+Framework arguments:  --clean
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 --clean
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-04-01 15:56:32.232
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-04-01 15:56:32.234
+!MESSAGE Log4j2 initialized with config file /Users/kj/Documents/GitHub/CLab-Tue-Group4/Exercise 2/.metadata/.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-04-01 15:56:36.013
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 4 4 2025-04-01 15:56:36.057
+!MESSAGE ProjectImporter: mdfind -name lsregister didn't returned anything
+!SESSION 2025-04-08 16:37:50.999 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_AU
+Framework arguments:  -keyring /Users/kj/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/kj/.eclipse_keyring
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2025-04-08 16:38:14.311
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-04-08 16:38:14.313
+!MESSAGE Log4j2 initialized with config file /Users/kj/Documents/GitHub/CLab-Tue-Group4/CLab/.metadata/.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 4 4 2025-04-08 16:38:17.046
+!MESSAGE ProjectImporter: mdfind -name lsregister didn't returned anything
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-04-08 16:38:17.056
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2025-04-08 16:42:04.425 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_AU
+Framework arguments:  -keyring /Users/kj/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/kj/.eclipse_keyring
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-04-08 16:42:13.399
+!MESSAGE Log4j2 initialized with config file /Users/kj/Documents/GitHub/CLab-Tue-Group4/CLab/.metadata/.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-04-08 16:42:17.553
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 4 4 2025-04-08 16:42:17.603
+!MESSAGE ProjectImporter: mdfind -name lsregister didn't returned anything
+!SESSION 2025-04-08 16:43:11.741 -----------------------------------------------
+eclipse.buildId=Version 1.18.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_AU
+Framework arguments:  -keyring /Users/kj/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/kj/.eclipse_keyring -data /Users/kj/Documents/GitHub/CLab-Tue-Group4/CLab
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2025-04-08 16:43:19.054
+!MESSAGE Log4j2 initialized with config file /Users/kj/Documents/GitHub/CLab-Tue-Group4/CLab/.metadata/.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2025-04-08 16:43:23.300
+!MESSAGE Started RMI Server, listening on port 41338
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 4 4 2025-04-08 16:43:23.359
+!MESSAGE ProjectImporter: mdfind -name lsregister didn't returned anything
