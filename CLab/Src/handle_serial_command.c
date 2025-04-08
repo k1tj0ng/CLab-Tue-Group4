@@ -11,7 +11,7 @@ void handle_serial_command(char* serial_command) {
 	char command[16];
 	char operand[128];
 
-    if (sscanf(serial_command, "%15s %[^\n]", command, operand) != 2) {
+    if (sscanf(serial_command, "%15s %[^\n]", command, operand) < 2) {
         return 0xFF;
     }
 
