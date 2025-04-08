@@ -1,112 +1,115 @@
 #include <stdint.h>
-#include <stddef.h>  // Required for NULL definition
+#include <stdio.h>
+#include <serial.h>
 #include "stm32f303xc.h"
-#include "serial.h"
-//#include "uart_interrupt.h"
-#include "system_stm32f3xx.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
-#warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
+  #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-volatile void (*on_usart1_receive)(char c) = NULL;
+#define ALTFUNCTION 0xA00
+#define RXTX 0x770000
+#define HIGHSPEED 0xF00
+#define BAUDRATE 0x46
+#define BUFFER 32
+#define LED_OUTPUT 0x5555
 
-//void USART1_IRQHandler() {
-//	SerialOutputString((uint8_t*)"Interrupt working yay\r\n", &USART1_PORT);
-//    // Check if RXNE flag is set (data received)
-//	if ((USART1->ISR & USART_ISR_RXNE) != 0) {
-//	        char received_char = USART1->RDR;  // Reading clears RXNE
-//
-//	        if ((USART1->ISR & (USART_ISR_FE | USART_ISR_ORE)) == 0) {
-//	            if (on_usart1_receive != NULL) {
-//	                on_usart1_receive(received_char);
-//	            }
-//	        }
-//	    } else {
-//    	USART1 -> CR1 = 0;
-//    	USART1 -> CR1 |= USART_CR1_RXNEIE | USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
-//    }
-//
-//    USART1 -> ISR &= ~USART_ISR_RXNE;
-//    USART1 -> CR1 |= USART_RQR_RXFRQ;
-//}
+void enableUSART1();
+void enableLEDs();
+void enableInterrupts();
+void USART1_IRQHandler();
 
-void USART1_IRQHandler() {
-    SerialOutputString((uint8_t*)"Interrupt working yay\r\n", &USART1_PORT);
+// Buffer to store incoming characters
+unsigned char string[BUFFER];
+unsigned char TERMINATING_CHAR = '#';
+int i = 0;
+int str_len = 0;
 
-    // Check if RXNE flag is set (data received)
-    if (USART1->ISR & USART_ISR_RXNE) {
-            // Read the received data (this clears the RXNE flag)
-            uint8_t received_data = (uint8_t)(USART1->RDR & 0xFF);
+int main(void)
+{
+	SerialInitialise(BAUD_115200, &USART1_PORT, 0x00);
+	enableLEDs();
+	enableInterrupts();
 
-            // Do something with the received data
-            // For example, echo it back:
-            USART1->TDR = received_data;
+//	char terminatingChar = '#';
 
-            // Or process it in some way
-        }
+//	SerialInputString(string, terminatingChar, sizeof(string), &USART1_PORT);
 
-
-    // No need to clear RXNE manually or reset anything else
+	for(;;)
+	{}
 }
 
-void enable_usart1_interrupt(void) {
-    __disable_irq();
+void enableLEDs()
+{
+	// Enable clock for Port E (LEDs)
+	RCC->AHBENR |= RCC_AHBENR_GPIOEEN;
 
-    SerialOutputString((uint8_t*)"Interrupt is working right now!\r\n", &USART1_PORT);
+	// Get the most significant 16 bits of port mode register as that is where the mode for the LEDs are defined
+	uint16_t* portMode = ((uint16_t*)&(GPIOE->MODER))+1;
 
-    NVIC_SetPriority(USART1_IRQn, 1);
-    NVIC_EnableIRQ(USART1_IRQn);
-
-    // RXNEIE should already be set in SerialInitialise or CR1 |= later
-    USART1->CR1 |= USART_CR1_RXNEIE;
-
-    __enable_irq();
+	// Set the mode of the port pins to output since they are LEDs
+	*portMode = LED_OUTPUT;
 }
 
-void finished_transmission(uint32_t bytes_sent) {
-	// This function will be called after a transmission is complete
+void enableInterrupts()
+{
+	__disable_irq();
 
-	volatile uint32_t test = 0;
-	// make a very simple delay
-	for (volatile uint32_t i = 0; i < 0x8ffff; i++) {
-		// waste time !
+	// Generate an interrupt upon receiving data
+	USART1->CR1 |= USART_CR1_RXNEIE_Msk;
+
+	// Set priority and enable interrupts
+	NVIC_SetPriority(USART1_IRQn, 1);
+	NVIC_EnableIRQ(USART1_IRQn);
+
+	__enable_irq();
+}
+
+void USART1_EXTI25_IRQHandler()
+{
+	// Check for overrun or frame errors
+	if ((USART1->ISR & USART_ISR_FE_Msk) && (USART1->ISR & USART_ISR_ORE_Msk))
+	{
+		return;
 	}
-}
 
-//void (*on_usart1_receive)(char c) = 0x00;
+	// If we have stored the maximum amount, stop
+	if (i == BUFFER)
+	{
+		return;
+	}
 
-void handle_received_char(char c) {
-    // Do something with the character (e.g., echo it back)
-    SerialOutputChar(c, &USART1_PORT);
+	if (USART1->ISR & USART_ISR_RXNE_Msk)
+	{
+		// Read data
+//		SerialOutputString((uint8_t*)"Message received: ", &USART1_PORT);
+//		SerialOutputString((uint8_t*)string, &USART1_PORT);
+//		unsigned char data = (uint8_t) USART1->RDR;
 
-    // Or store it, process it, etc.
-}
+		unsigned char data = (uint8_t) USART1->RDR;
+//		SerialOutputString((uint8_t*)"Message received: ", &USART1_PORT);
+		SerialOutputChar((uint8_t *)data, &USART1_PORT);
+		string[i] = data;
+		i++;
+		str_len++;
+		if (data == TERMINATING_CHAR){
+			str_len--;
+
+			SerialOutputString((uint8_t*)"\nThe length is:", &USART1_PORT);
+
+//			char strLenBuffer[10] = IntToStr(str_len)
+			SerialOutputString((uint8_t*)str_len, &USART1_PORT);
+		}
+		//SerialOutputString((uint8_t*)string, &USART1_PORT);
 
 
-int main(void) {
-    // Initialize serial communication with 115200 baud rate
-    SerialInitialise(BAUD_115200, &USART1_PORT, 0x00);
 
-    // Initialize interrupt-based reception without needing to pass the terminator
-//    USART1->CR1 |= USART_CR1_RXNEIE;
-//    __disable_irq();
+//		// Store the read data
+//		string[i] = data;
+//		i++;
 //
-//    NVIC_EnableIRQ(USART1_IRQn);
-//    NVIC_SetPriority(USART1_IRQn, 1);
-
-//    SerialInterruptInit(&USART1_PORT);
-
-//    SerialInterruptSetReceiveCallback(on_usart1_receive);
-
-    // Send welcome message
-
-    on_usart1_receive = handle_received_char;
-
-    SerialOutputString((uint8_t*)"Serial system ready. Type a message ending with @\r\n", &USART1_PORT);
-
-    enable_usart1_interrupt();
-
-
-    while (1) {}
+//		// Toggle LEDs
+//		uint8_t* lights = ((uint8_t*)&(GPIOE->ODR)) + 1;
+//		*lights = !(*lights);
+	}
 }
