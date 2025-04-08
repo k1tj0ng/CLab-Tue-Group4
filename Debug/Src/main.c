@@ -95,21 +95,11 @@ void USART1_EXTI25_IRQHandler()
 		if (data == TERMINATING_CHAR){
 			str_len--;
 
-			SerialOutputString((uint8_t*)"\nThe length is:", &USART1_PORT);
+			SerialOutputString((uint8_t*)"\nThe length is: ", &USART1_PORT);
 
-//			char strLenBuffer[10] = IntToStr(str_len)
-			SerialOutputString((uint8_t*)str_len, &USART1_PORT);
+			char strLenBuffer[10];
+			sprintf(strLenBuffer, "%d", str_len);
+			SerialOutputString((uint8_t*)strLenBuffer, &USART1_PORT);
 		}
-		//SerialOutputString((uint8_t*)string, &USART1_PORT);
-
-
-
-//		// Store the read data
-//		string[i] = data;
-//		i++;
-//
-//		// Toggle LEDs
-//		uint8_t* lights = ((uint8_t*)&(GPIOE->ODR)) + 1;
-//		*lights = !(*lights);
 	}
 }

@@ -113,7 +113,7 @@ void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 		pt++;
 	}
 
-	serial_port->completion_function(counter);
+//	serial_port->completion_function(counter);
 }
 
 char SerialInputChar(SerialPort *serial_port) {
