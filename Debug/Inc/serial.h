@@ -3,6 +3,7 @@
 
 
 #include <stdint.h>
+#include "stm32f303xc.h"
 
 // Defining the serial port struct, the definition is hidden in the
 // c file as no one really needs to know this.
@@ -39,15 +40,9 @@ void SerialOutputChar(uint8_t, SerialPort *serial_port);
 // SerialOutputString - output a NULL TERMINATED string to the serial port
 // Input: pointer to a NULL-TERMINATED string (if not null terminated, there will be problems)
 void SerialOutputString(uint8_t *pt, SerialPort *serial_port);
+
+char SerialInputChar(SerialPort *serial_port);
+
+void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, SerialPort *serial_port);
  
- 
-// Callback function types
-//typedef void (*SerialRxCallback)(char* str, uint32_t len);  // RX complete callback
-//typedef void (*SerialTxCallback)(void);                     // TX complete callback
-//
-//// Public API
-//void Serial_PollRx(SerialPort *por, char terminatingChar)                      // Poll for RX data
-//void Serial_SetRxCallback(SerialRxCallback cb);             // Set RX callback
-//void Serial_SetTxCallback(SerialTxCallback cb);             // Set TX callback
-//
 #endif

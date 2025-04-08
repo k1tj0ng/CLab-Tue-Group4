@@ -1,10 +1,12 @@
 #include "serial.h"
+#include <stddef.h>
 
 #include "stm32f303xc.h"
 
 // We store the pointers to the GPIO and USART that are used
 //  for a specific serial port. To add another serial port
 //  you need to select the appropriate values.
+
 struct _SerialPort {
 	USART_TypeDef *UART;
 	GPIO_TypeDef *GPIO;
@@ -17,8 +19,6 @@ struct _SerialPort {
 	volatile uint32_t SerialPinAlternatePinValueHigh;
 	void (*completion_function)(uint32_t);
 };
-
-
 
 // instantiate the serial port parameters
 //   note: the complexity is hidden in the c file
@@ -34,9 +34,9 @@ SerialPort USART1_PORT = {USART1,
 		0x00 // default function pointer is NULL
 		};
 
-
 // InitialiseSerial - Initialise the serial port
 // Input: baudRate is from an enumerated set
+
 void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*completion_function)(uint32_t)) {
 
 	serial_port->completion_function = completion_function;
@@ -70,19 +70,19 @@ void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*complet
 	switch(baudRate){
 	case BAUD_9600:
 		// NEED TO FIX THIS !
-		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		*baud_rate_config = 840;  // 115200 at 8MHz
 		break;
 	case BAUD_19200:
 		// NEED TO FIX THIS !
-		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		*baud_rate_config = 420;  // 115200 at 8MHz
 		break;
 	case BAUD_38400:
 		// NEED TO FIX THIS !
-		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		*baud_rate_config = 210;  // 115200 at 8MHz
 		break;
 	case BAUD_57600:
 		// NEED TO FIX THIS !
-		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		*baud_rate_config = 140;  // 115200 at 8MHz
 		break;
 	case BAUD_115200:
 		*baud_rate_config = 0x46;  // 115200 at 8MHz
@@ -92,13 +92,6 @@ void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*complet
 
 	// enable serial port for tx and rx
 	serial_port->UART->CR1 |= USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
-}
-
-void SerialInputChar() {
-	while((serial_port->UART->ISR & USART_ISR_TXE) == 0){
-	}
-
-
 }
 
 void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
@@ -120,8 +113,35 @@ void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 		pt++;
 	}
 
-	serial_port->completion_function(counter);
+//	serial_port->completion_function(counter);
 }
 
+char SerialInputChar(SerialPort *serial_port) {
+    // Wait until data is received
+    while((serial_port->UART->ISR & USART_ISR_RXNE) == 0) {}
 
+    // Return the received character
+    return (char)(serial_port->UART->RDR & 0xFF);
+}
 
+void SerialInputString(char *buffer, char terminatingChar, uint32_t max_length, SerialPort *serial_port) {
+    uint32_t index = 0;
+    char received_char;
+
+    while(index < max_length - 1) {
+        received_char = SerialInputChar(serial_port);
+
+        // Echo back (optional)
+        SerialOutputChar(received_char, serial_port);
+
+        // End on newline or  svcarriage return
+        if(received_char == terminatingChar) {
+            break;
+        }
+
+        buffer[index++] = received_char;
+    }
+
+    // Null-terminate the string
+    buffer[index] = '\0';
+}

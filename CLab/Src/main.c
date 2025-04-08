@@ -43,7 +43,7 @@ void finished_transmission(uint32_t bytes_sent) {
 
 int main(void)
 {
-//	uint8_t *string_to_send = "This is a string !\r\n";
+	uint8_t *string_to_send = "This is a string !\r\n";
 
 	//void (*completion_function)(uint32_t) = &finished_transmission;
 	enable_clocks();
@@ -53,11 +53,7 @@ int main(void)
 
 	/* Loop forever */
 	for(;;) {
-		char input[32];
-		const char terminatingChar = '@';
-
-		SerialInputString(input, terminatingChar, sizeof(input), &USART1_PORT);
-		SerialOutputString((uint8_t *)input, &USART1_PORT);
+		SerialOutputString(string_to_send, &USART1_PORT);
 	}
 }
 
