@@ -4,6 +4,14 @@
 
 #include <stdint.h>
 
+#define BUFFER 32
+extern unsigned char strings[2][BUFFER];
+extern unsigned char TERMINATING_CHAR;
+extern int activeIndex;
+extern int readyIndex;
+extern int i;
+extern int str_len;
+
 // Defining the serial port struct, the definition is hidden in the
 // c file as no one really needs to know this.
 struct _SerialPort;
@@ -39,11 +47,5 @@ void SerialOutputChar(uint8_t, SerialPort *serial_port);
 // SerialOutputString - output a NULL TERMINATED string to the serial port
 // Input: pointer to a NULL-TERMINATED string (if not null terminated, there will be problems)
 void SerialOutputString(uint8_t *pt, SerialPort *serial_port);
-
-#define BUFFER 32
-extern unsigned char string[BUFFER];     // Declare the variable, don't define it here
-extern unsigned char TERMINATING_CHAR;   // Declare the variable, don't define it here
-extern int i;                            // Declare the variable, don't define it here
-extern int str_len;
 
 #endif

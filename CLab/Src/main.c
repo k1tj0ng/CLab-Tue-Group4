@@ -20,12 +20,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "stm32f303xc.h"
+
 #include "serial.h"
 #include "timer.h"
-#include "stm32f303xc.h"
 #include "digital_io.h"
 #include "setup.h"
+
 #include "handler.h"
+#include "interrupts.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
@@ -42,27 +45,13 @@ void finished_transmission(uint32_t bytes_sent) {
 	}
 }
 
-void enableInterrupts()
-{
-	__disable_irq();
-
-	// Generate an interrupt upon receiving data
-	USART1->CR1 |= USART_CR1_RXNEIE_Msk;
-
-	// Set priority and enable interrupts
-	NVIC_SetPriority(USART1_IRQn, 1);
-	NVIC_EnableIRQ(USART1_IRQn);
-
-	__enable_irq();
-}
-
 int main(void)
 {
 //	enable_clocks();
 //	initialise_board();
 
 	SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
-	enableInterrupts();
+	UARTenableInterrupts();
 
 	/* Loop forever */
 	for(;;) {

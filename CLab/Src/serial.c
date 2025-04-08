@@ -2,6 +2,13 @@
 
 #include "stm32f303xc.h"
 
+unsigned char strings[2][BUFFER];     // Define the variable here
+unsigned char TERMINATING_CHAR = '#';   // Define the variable here
+int activeIndex = 0;
+int readyIndex = -1;
+int i = 0;                            // Define the variable here
+int str_len = 0;
+
 // We store the pointers to the GPIO and USART that are used
 //  for a specific serial port. To add another serial port
 //  you need to select the appropriate values.
@@ -149,4 +156,3 @@ void SerialInputString(uint8_t *buffer, uint8_t terminator, SerialPort *serial_p
         serial_port->completion_function(counter);
     }
 }
-
