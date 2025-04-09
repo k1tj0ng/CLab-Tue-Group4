@@ -283,42 +283,26 @@ The timer interrupt is handled by the TIM2_IRQHandler function. The interrupt wi
 ### Summary
 Using the previous exercises, the integration task focuses on combining all the modules to develop a program that can perform several functions, depending on the user input to the serial port. There are several pre-defined commands that the user can type into the serial port such as, `led 10001010`, `serial This transmits the strings back`, `oneshot 1000`, and `timer 1000`. We will look at this in more detail. We can also think of this like calling a function with custom parameters through the serial port. The program checks for which function is to be called with the use of a if-else block.
 
+### Notes
+Most of the initialising functions in here are the same, therefore only some of the important parts are put into the code snippet to avoid repitition.
+
 ### Usage
 The user should type a string with 2 parts, first being the function name and second being the function value (parameters). It is then received by the UART receive module. The program will then extract the first part of the string and checks which function to be called and passes on the parameters which is the second part of the string. Both parts of the strings will be stores in seperate buffers to be passed/called by the following functions. After storing the first part of the string, we can then use an if-else block to check which function needs to be called.
-```
-// 'command' is where the first part of the string is stored
-// 'value' is where the second part of the string is stored
-if(strcasecmp(command, "led") == 0) {
-handleNumericCommand("LED", value);
-} else if(strcasecmp(command, "timer") == 0) {
-        handleNumericCommand("TIMER", value);
-} else if(strcasecmp(command, "oneshot") == 0) {
-        handleNumericCommand("ONESHOT", value);
-} else if(strcasecmp(command, "serial") == 0) {
-        handleSerial(value);
-} else {
-        SerialOutputString((uint8_t*)"Unknown command: ", &USART1_PORT);
-        SerialOutputString((uint8_t*)command, &USART1_PORT);
-        SerialOutputString((uint8_t*)"\n", &USART1_PORT);
-}
-```
 
-#### 1. LED 
+// j provide brief description of what each part does
+
+1. LED 
 Taking the values from the second part of the string, i.e. 10001010, the function should output LEDs with the given pattern value. 
-```
-code in here
-```
-
-#### 2. Serial
-From exercise 2, the "serial" comand will transmit the string back over the serial port. 
-```
-code in here
-```
-
-#### 3. Oneshot
 
 
-#### 4. Timer
+2. Serial
+From exercise 2, the "serial" comand will transmit the string back over the serial port.
+
+
+4. Oneshot
+
+
+5. Timer
 
 ### Valid input
 - The input by the user should have 2 parts.
@@ -326,13 +310,136 @@ code in here
 - The second part must correspond to the parameters of the function to be called.
 
 ### Functions and modularity
-#### 1. Enable Interrupts
-#### 2. Interrupt Handlers
-#### 3. LEDs Registers
-#### 4. Serial Registers
-#### 5. Timers Registers
+#### 1. **integration.c**
+This module is designed to handle the main process of the program with the use of several functions. It branches to other function depending on the string entered by the user in the serial port. 
+i. `sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex)`
+- This function's task is to read the user's input and decide which function is to be called next
+- The following code snippets will be divided into parts for simplicity
+```
+void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
+    char* input = buffers[bufIndex];
+
+    // Trim whitespace and newlines
+    size_t len = strlen(input);
+    while(len > 0 && isspace(input[len-1])) {
+        input[--len] = '\0';
+    }
+
+    // Skip leading whitespace
+    char* cmdStart = input;
+    while(isspace(*cmdStart)) {
+        cmdStart++;
+    }
+```
+- The code above essentially cleans the string received by removing any trailing/leading whitespaces and sorts.
+- It also adds a null terminating character `\0` at the end of the string.
+```
+    // Extract command and value
+    char* command = cmdStart;
+    char* value = strchr(cmdStart, ' ');
+    if(value != NULL) {
+        *value++ = '\0';
+        while(isspace(*value)) value++;
+    }
+```
+- This part of the code is where the user's input is assigned into a variable.
+- `command` refers to the first part of the string.
+- `value` refers to the second part of the string.
+
+```
+    // Debug print
+	SerialOutputString((uint8_t*)"\nProcessing: [", &USART1_PORT);
+	SerialOutputString((uint8_t*)cmdStart, &USART1_PORT);
+	SerialOutputString((uint8_t*)"]\n", &USART1_PORT);
+```
+- To make the process cleaner, a statement is printed through the serial port.
+
+```
+    // Command processing
+    if(strcasecmp(command, "led") == 0) {
+        handleNumericCommand("LED", value);
+    }
+    else if(strcasecmp(command, "timer") == 0) {
+        handleNumericCommand("TIMER", value);
+    	timerdemo(value);
+    }
+    else if(strcasecmp(command, "oneshot") == 0) {
+    	handleNumericCommand("ONESHOT", value);
+    	timer_one_shot(value, timerCallback);
+    }
+    else if(strcasecmp(command, "serial") == 0) {
+        handleSerial(value);
+    }
+    else {
+        SerialOutputString((uint8_t*)"Unknown command: ", &USART1_PORT);
+        SerialOutputString((uint8_t*)command, &USART1_PORT);
+        SerialOutputString((uint8_t*)"\n", &USART1_PORT);
+    }
+    SerialOutputString((uint8_t*)"\n", &USART1_PORT);
+    memset(buffers[bufIndex], 0, BUFFER);
+}
+```
+- Using if-else statements, we then compare `command` with several different keywords that refers to the function it should call afterwards.
+- Once it matches one of the keywords, it calls the designated function, taking `value` as a parameter.
+
+#### 2. **interrupts.c**
+There are a few interrupts that are used within this integrated program. The following are the functions used to set the conditions of triggering the interrupt, and enabling it:
+i. `UARTenableInterrupts()`
+- Taken from exercise 2, this interrupt would be generated when a data is received by the UART
+```
+	// Generate an interrupt upon receiving data
+	USART1->CR1 |= USART_CR1_RXNEIE_Msk;
+
+	// Set priority and enable interrupts
+	NVIC_SetPriority(USART1_IRQn, 1);
+	NVIC_EnableIRQ(USART1_IRQn);
+```
+
+ii. `timer_init(uint32_t interval, CallbackFunction callback)`
+- Taken from exercise 3, this interrupt would be generated when overflows occur (timer count resets to 0)
+```
+	// Enable interrupt when there is overflow
+	TIM2->DIER |= TIM_DIER_UIE;
+	NVIC_EnableIRQ(TIM2_IRQn);
+```
+
+iii. `  `
+
+#### 3. **handler.c**
+For this specific integrated program, we introduce new global variables:
+```
+volatile uint16_t writePos = 0;       // Current write position
+volatile bool bufferReady = false;     // Data ready flag
+```
+`bufferReady` will then be used later on in the main function as a flag. 
+
+i. `USART1_EXTI25_IRQHandler()`
+- Taken from exercise 2, the handler function differs in the data checking part
+```
+if (data == '\n' || data == '\r') {
+	// Terminate string and mark buffer ready
+	strings[activeIndex][writePos] = '\0';
+	bufferReady = 1;
+
+	// Swap buffers
+	readyIndex = activeIndex;
+	activeIndex ^= 1;
+	writePos = 0;
+
+	// Clear new active buffer
+	memset((void*)strings[activeIndex], 0, BUFFER);
+}
+```
+- The code above checks if the received string is `\n` or `\r` as it signals the end of a message.
+- If so, `bufferReady` is set to 1, signaling that it is ready to be processed in the main function.
+
+ii. `TIM2_IRQHandler()`
+- Taken from exercise 3, there is no change in the function.
+- 
+
+#### 4. LEDs Registers
+#### 5. Serial Registers
+#### 6. Timers Registers
 
 ### Testing
-
-### Notes
 
