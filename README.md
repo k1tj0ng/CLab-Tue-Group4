@@ -79,7 +79,7 @@ void SerialInputString(uint8_t *buffer, uint8_t terminator, SerialPort *serial_p
 This function is not really efficient since it loops to check, if the controller is ready to receive data or not. Hence, in part c, we changed the serial receiving process with an interrupt based approach.
 
 ### Functions and modularity
-#### 1. Interrupts
+1. Interrupts
 The first thing that we need to do when setting up interrupts is to enable the peripherals needed. Afterwards, we need to set a specific interrupt function. This basically means telling the controller to generate an interrupt when a specific event that we set occurs. In this case, it is when we receive data in the UART module.
 ```
 void enableInterrupts() {
@@ -141,7 +141,7 @@ void USART1_EXTI25_IRQHandler(void) {
 ```
 This function, called the Interrupt Service Routine (ISR), essentialy handles the event. When it is called, the received data will then be stored in a buffer storage. Afterwards, it transmits the data back to the user.
 
-#### 2. Outputs
+2. Outputs
 To output the function, we used a function called SerialOutputString and SerialOutputChar (from the lecture) that takes in the list of characters (array) as parameters and outputs the list to PuTTy or other terminal software.
 ```
 void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
@@ -201,19 +201,67 @@ The timer module allows you to:
    - This function initializes the timer with a specified interval (in milliseconds) and a callback function.
    - It sets up the timer’s prescaler, auto-reload register (ARR), and enables the timer interrupt.
    - The callback function is stored for later execution when the timer overflows.
+```
+void timer_init(uint32_t interval, CallbackFunction callback) {
+	// Set up the timer prescaler
+	TIM2->PSC = 7999;  // (8MHz:1000)-1
+	TIM2->ARR = interval;
+
+	// Enable interrupt when there is overflow
+	TIM2->DIER |= TIM_DIER_UIE;
+	NVIC_EnableIRQ(TIM2_IRQn);
+	
+	// Set the callback function
+	timerCallback = callback;
+	
+	// Start the timer
+	TIM2->CR1 |= TIM_CR1_CEN;
+}
+```
 
 2. **`timer_reset(uint32_t interval)`**:
     - This function resets the timer with a new interval.
     - It resets the counter, updates the ARR register, and re-starts the timer.
+```
+void timer_reset(uint32_t interval) {
+    TIM2->CR1 &= ~TIM_CR1_CEN;       // Stop timer
+    TIM2->CNT = 0;                   // Reset counter
+    TIM2->ARR = interval;            // Update ARR
+    TIM2->EGR |= TIM_EGR_UG;         // Force update event to load ARR
+    TIM2->CR1 |= TIM_CR1_CEN;        // Restart timer
+}
+```
 
 3. **`timer_one_shot(uint32_t delay, CallbackFunction callback)`**:
     - This function sets the timer for a one-shot event, meaning the timer triggers the callback once after the specified delay and then stops.
     - It uses a flag (`isOneShot`) to indicate that the timer should stop after one callback.
+```
+void timer_one_shot(uint32_t delay, CallbackFunction callback) {
+	// Set the delay and callback function
+	timerCallback = callback;
+//	isOneShot = true;
+	
+	TIM2->CNT = 0;      // Reset the timer counter
+	TIM2->ARR = delay;  // Reload the ARR register with the new interval
+	TIM2->CR1 |= TIM_CR1_CEN;
+	
+	// Re-initialize the timer
+	timer_init(delay, timerCallback);
+}
+```
       
 4. **`TIM2_IRQHandler(void)`**:
     - This interrupt handler is triggered whenever the timer (TIM2) overflows.
     - It checks the interrupt flag, clears it, and executes the stored callback function.
     - If the one-shot mode is active, it disables the timer after executing the callback to stop it from continuing.
+```
+void TIM2_IRQHandler(void) {
+    if (TIM2->SR & TIM_SR_UIF) {  // Check if the interrupt flag is raised
+        TIM2->SR &= ~TIM_SR_UIF;  // Clear the interrupt flag
+        timerCallback();  // Execute the callback function
+    }
+}
+```
 
 ### Testing
 To test the functionality of the timer module, the following steps were used:
@@ -233,7 +281,7 @@ The timer interrupt is handled by the TIM2_IRQHandler function. The interrupt wi
 ## Exercise 4 - Integration
 
 ### Summary
-Using the previous exercises, the integration task focuses on combining all the modules to develop a program that can perform several functions, depending on the user input to the serial port. There are several pre-defined commands that the user can type into the serial port such as, 'led 10001010', 'serial This transmits the strings back', 'oneshot 1000', and 'timer 1000'. We will look at this in more detail. We can also think of this like calling a function with custom parameters through the serial port. The program checks for which function is to be called with the use of a if-else block.
+Using the previous exercises, the integration task focuses on combining all the modules to develop a program that can perform several functions, depending on the user input to the serial port. There are several pre-defined commands that the user can type into the serial port such as, `led 10001010`, `serial This transmits the strings back`, `oneshot 1000`, and `timer 1000`. We will look at this in more detail. We can also think of this like calling a function with custom parameters through the serial port. The program checks for which function is to be called with the use of a if-else block.
 
 ### Usage
 The user should type a string with 2 parts, first being the function name and second being the function value (parameters). It is then received by the UART receive module. The program will then extract the first part of the string and checks which function to be called and passes on the parameters which is the second part of the string. Both parts of the strings will be stores in seperate buffers to be passed/called by the following functions. After storing the first part of the string, we can then use an if-else block to check which function needs to be called.
