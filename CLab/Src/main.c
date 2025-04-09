@@ -64,6 +64,7 @@ int main(void)
 }
 }
 
+
 void blink_leds(void) {
 	// This function will be called if there is a timer overflow
 	static uint8_t led_state = 0;
@@ -71,19 +72,27 @@ void blink_leds(void) {
 	led_state = !led_state;  // Flip the state
 }
 
-int timerdemo(void) {
+int timerdemo (void) {
 	enable_clocks();
 	initialise_board();
-
-	// Timer that triggers the callback (blink LED) every x millisecond
-	timer_init(1000, blink_leds); // Input the time interval in millisecond
-
+	
+	// Timer that triggers the callback (blink LED) every 100 milliseconds
+	timer_init(100, blink_leds);
+	
 	// Delay for a few seconds or do something
 	for (volatile int i = 0; i < 5000000; i++) {
 	}
-
-	timer_reset(100);	// Change the interval
-
-	while (1) {
+	
+	// Change the interval to 1000 milliseconds
+	timer_reset(1000);
+	
+	// Delay for a few seconds or do something
+	for (volatile int i = 0; i < 5000000; i++) {
 	}
+	
+	// Trigger a one-shot event after 10000 ms (10 seconds)
+	timer_one_shot(10000, blink_leds);
+
+	while (1) {}
 }
+
