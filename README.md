@@ -182,16 +182,50 @@ To start, set up the serial terminal emulator and connect it with your microcont
 ## Exercise 3 - Timer Interfaces
 
 ### Summary
+This section is the system's timer software module. The timer should trigger a callback function at regular intervals, allow resetting the interval, and trigger a one-shot event. The module is designed using a general-purpose timer (TIM2).
 
 ### Usage
+The timer module allows you to:
+1. **Initialize the timer** to trigger a callback function at a regular interval.
+2. **Reset the timer** with a new period when needed.
+3. **Trigger a one-shot event**, where the timer triggers a callback once and then stops.
 
 ### Valid input
+1. **Interval for Periodic Timer**: The `interval` parameter passed to the `timer_init` function specifies the time period in milliseconds at which the callback will be executed. Valid inputs are positive integer values that represent the time in milliseconds.
+2. **Delay for One-Shot Timer**: The `delay` parameter passed to the `timer_one_shot` function specifies the time in milliseconds before triggering the callback once. It should also be a positive integer.
 
 ### Functions and modularity
+1. **`timer_init(uint32_t interval, CallbackFunction callback)`**:
+   - This function initializes the timer with a specified interval (in milliseconds) and a callback function.
+   - It sets up the timer’s prescaler, auto-reload register (ARR), and enables the timer interrupt.
+   - The callback function is stored for later execution when the timer overflows.
+
+2. **`timer_reset(uint32_t interval)`**:
+    - This function resets the timer with a new interval.
+    - It resets the counter, updates the ARR register, and re-starts the timer.
+
+3. **`timer_one_shot(uint32_t delay, CallbackFunction callback)`**:
+    - This function sets the timer for a one-shot event, meaning the timer triggers the callback once after the specified delay and then stops.
+    - It uses a flag (`isOneShot`) to indicate that the timer should stop after one callback.
+      
+4. **`TIM2_IRQHandler(void)`**:
+    - This interrupt handler is triggered whenever the timer (TIM2) overflows.
+    - It checks the interrupt flag, clears it, and executes the stored callback function.
+    - If the one-shot mode is active, it disables the timer after executing the callback to stop it from continuing.
 
 ### Testing
+To test the functionality of the timer module, the following steps used:
+1. **Test Periodic Timer**:
+   - Initialize the timer with a specific interval (e.g., 100 ms) and a callback function that swap the state of LED. Verify that the callback is executed at the expected interval.
+   - Test with another time interval.
+2. **Test Timer Reset**:
+    - Use the periodic timer for a certain amount of time (use the for loop to waste some times)
+    - Call `timer_reset` with a different interval and verify that the timer now triggers the callback at the new interval. Ensure that the timer continues to function after the reset.
+3. **Test One-Shot Timer**:
+    - Call `timer_one_shot` with a delay and verify that the callback is executed exactly once after the specified time. Ensure that the timer stops after triggering the callback and does not repeat.
 
 ### Notes
+The timer interrupt is handled by the TIM2_IRQHandler function. The interrupt will only be triggered when the timer overflows.
 
 ## Exercise 4 - Integration
 
