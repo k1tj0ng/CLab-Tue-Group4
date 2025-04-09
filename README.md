@@ -289,20 +289,21 @@ Most of the initialising functions in here are the same, therefore only some of 
 ### Usage
 The user should type a string with 2 parts, first being the function name and second being the function value (parameters). It is then received by the UART receive module. The program will then extract the first part of the string and checks which function to be called and passes on the parameters which is the second part of the string. Both parts of the strings will be stores in seperate buffers to be passed/called by the following functions. After storing the first part of the string, we can then use an if-else block to check which function needs to be called.
 
-// j provide brief description of what each part does
+The commands are more or less the same as exercises 1, 2, and 3. Here is a brief recap of what each command should do:
 
 1. LED 
-Taking the values from the second part of the string, i.e. 10001010, the function should output LEDs with the given pattern value. 
+- Taking the values from the second part of the string, i.e. 10001010, the function should output LEDs with the given pattern value. 
 
 
 2. Serial
-From exercise 2, the "serial" comand will transmit the string back over the serial port.
+- From exercise 2, the "serial" comand will transmit the received string back over the serial port.
 
 
 4. Oneshot
-
+- The timer should run only once with a delay that is set.
 
 5. Timer
+- the timer would do a task at every regular interval.
 
 ### Valid input
 - The input by the user should have 2 parts.
