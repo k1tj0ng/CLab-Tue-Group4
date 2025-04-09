@@ -20,6 +20,14 @@
 ## 🔍 Project Overview
 Using C to interact with the microcontroller. Unlike last project, we aim to tackle the problems using interrupts instead of polling. This provides a more efficient way of processing our programs.
 
+<details open>
+<summary>📑 Table of Contents</summary>
+- [Exercise 1 - Digital I/0](## Exercise 1 - Digital I/0)
+- [Exercise 2 - Serial Interfaces](## Exercise 2 - Serial Interfaces)
+- [Exercise 3 - Timer Interfaces](## Exercise 3 - Timer Interfaces)
+- [Exercise 4 - Integration](#Exercise 4 - Integration)
+</details>
+
 
 ## Exercise 1 - Digital I/0
 
@@ -34,6 +42,8 @@ Using C to interact with the microcontroller. Unlike last project, we aim to tac
 ### Testing
 
 ### Notes
+
+[↑ Back to Top](## 🔍 Project Overview)
 
 ## Exercise 2 - Serial Interfaces
 
@@ -179,6 +189,8 @@ To start, set up the serial terminal emulator and connect it with your microcont
 
 ### Notes
 
+[↑ Back to Top](## 🔍 Project Overview)
+
 ## Exercise 3 - Timer Interfaces
 
 ### Summary
@@ -228,6 +240,8 @@ To test the functionality of the timer module, the following steps were used:
 
 ### Notes
 The timer interrupt is handled by the TIM2_IRQHandler function. The interrupt will only be triggered when the timer overflows.
+
+[↑ Back to Top](## 🔍 Project Overview)
 
 ## Exercise 4 - Integration
 
@@ -286,3 +300,5 @@ code in here
 ### Testing
 
 ### Notes
+
+[↑ Back to Top](## 🔍 Project Overview)
