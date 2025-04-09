@@ -27,7 +27,7 @@ void USART1_EXTI25_IRQHandler(void) {
         }
 
         // Echo back (optional)
-        SerialOutputChar(data, &USART1_PORT);
+//        SerialOutputChar(data, &USART1_PORT);
 
         if (data == '\n' || data == '\r') {
             // Terminate string and mark buffer ready

@@ -11,6 +11,7 @@ extern int activeIndex;
 extern int readyIndex;
 extern int i;
 extern int str_len;
+extern int serialCommand;
 
 // Defining the serial port struct, the definition is hidden in the
 // c file as no one really needs to know this.

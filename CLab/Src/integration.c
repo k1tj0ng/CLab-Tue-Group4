@@ -7,6 +7,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+int maxInputLength = 8;
+int serialCommand = 0;
+
 void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
     char* input = buffers[bufIndex];
 
@@ -43,38 +46,47 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
         }
     }
 
-    // 5. Process commands (case-insensitive)
-    if(strcasecmp(command, "led") == 0) {
-        if(value != NULL) {
-            SerialOutputString((uint8_t*)"LED: ", &USART1_PORT);
-            SerialOutputString((uint8_t*)value, &USART1_PORT);
-            SerialOutputString((uint8_t*)"\n", &USART1_PORT);
+    if(value == NULL) {
+    	SerialOutputString((uint8_t*)"Error: Invalid Serial Command\n", &USART1_PORT);
+//		return;
+    } else if (strcasecmp(command, "serial") == 1) {
+    	int inputValue;
 
-            // Here you would call your LED control function
-            // e.g., set_led_state(atoi(value));
-        } else {
-            SerialOutputString((uint8_t*)"Error: LED needs value\n", &USART1_PORT);
-        }
-    }
-    else if(strcasecmp(command, "serial") == 0) {
+    	char *endptr;
+    	long num = strtol(value, &endptr, 10);
+
+    	inputValue = (int)num;
+
+    	if(strcasecmp(command, "led") == 0) {
+
+			SerialOutputString((uint8_t*)"LED: ", &USART1_PORT);
+			SerialOutputString((uint8_t*)value, &USART1_PORT);
+			SerialOutputString((uint8_t*)"\n", &USART1_PORT);
+
+		} else if (strcasecmp(command, "timer") == 0) {
+
+			SerialOutputString((uint8_t*)"TIMER: ", &USART1_PORT);
+			SerialOutputString((uint8_t*)value, &USART1_PORT);
+			SerialOutputString((uint8_t*)"\n", &USART1_PORT);
+
+		} else if (strcasecmp(command, "oneshot") == 0) {
+			SerialOutputString((uint8_t*)"ONESHOT: ", &USART1_PORT);
+			SerialOutputString((uint8_t*)value, &USART1_PORT);
+			SerialOutputString((uint8_t*)"\n", &USART1_PORT);
+		}
+
+    } else if(strcasecmp(command, "serial") == 0) {
         SerialOutputString((uint8_t*)"SERIAL command\n", &USART1_PORT);
-        // Call serial-specific functions here
-    }
-    else if(strcasecmp(command, "timer") == 0) {
-        if(value != NULL) {
-            SerialOutputString((uint8_t*)"TIMER: ", &USART1_PORT);
-            SerialOutputString((uint8_t*)value, &USART1_PORT);
-            SerialOutputString((uint8_t*)"\n", &USART1_PORT);
-        } else {
-            SerialOutputString((uint8_t*)"Error: TIMER needs value\n", &USART1_PORT);
-        }
-    }
-    else {
+        serialCommand  = 1;
+        SerialOutputString((uint8_t*)"String echo back: ", &USART1_PORT);
+		SerialOutputString((uint8_t*)value, &USART1_PORT);
+		SerialOutputString((uint8_t*)"\n", &USART1_PORT);
+
+    } else {
         SerialOutputString((uint8_t*)"Unknown command: ", &USART1_PORT);
         SerialOutputString((uint8_t*)command, &USART1_PORT);
         SerialOutputString((uint8_t*)"\n", &USART1_PORT);
     }
 
-    // 6. Clear the processed buffer
     memset(buffers[bufIndex], 0, BUFFER);
 }
