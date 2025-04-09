@@ -311,7 +311,7 @@ The commands are more or less the same as exercises 1, 2, and 3. Here is a brief
 - The second part must correspond to the parameters of the function to be called.
 
 ### Functions and modularity
-#### 1. **integration.c**
+#### 1. "**integration.c**"
 This module is designed to handle the main process of the program with the use of several functions. It branches to other function depending on the string entered by the user in the serial port. 
 i. `sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex)`
 - This function's task is to read the user's input and decide which function is to be called next
@@ -383,7 +383,7 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
 - Using if-else statements, we then compare `command` with several different keywords that refers to the function it should call afterwards.
 - Once it matches one of the keywords, it calls the designated function, taking `value` as a parameter.
 
-#### 2. **interrupts.c**
+#### 2. "**interrupts.c**"
 There are a few interrupts that are used within this integrated program. The following are the functions used to set the conditions of triggering the interrupt, and enabling it:
 i. `UARTenableInterrupts()`
 - Taken from exercise 2, this interrupt would be generated when a data is received by the UART
@@ -406,7 +406,7 @@ ii. `timer_init(uint32_t interval, CallbackFunction callback)`
 
 iii. `  `
 
-#### 3. **handler.c**
+#### 3. "**handler.c**"
 For this specific integrated program, we introduce new global variables:
 ```
 volatile uint16_t writePos = 0;       // Current write position
