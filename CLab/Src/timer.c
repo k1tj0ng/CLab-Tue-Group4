@@ -27,20 +27,28 @@ void timer_init(uint32_t interval, CallbackFunction callback) {
 }
 
 // Reset the timer with the new interval
+//void timer_reset(uint32_t interval) {
+//	TIM2->CNT = 0;         // Reset the timer counter
+//	TIM2->ARR = interval;  // Reload the ARR register with the new interval
+////	TIM2->CR1 |= TIM_CR1_CEN;
+//
+//	// Re-initialize the timer
+////	timer_init(interval, timerCallback);
+//}
+
 void timer_reset(uint32_t interval) {
-	TIM2->CNT = 0;         // Reset the timer counter
-	TIM2->ARR = interval;  // Reload the ARR register with the new interval
-	TIM2->CR1 |= TIM_CR1_CEN;
-	
-	// Re-initialize the timer
-	timer_init(interval, timerCallback);
+    TIM2->CR1 &= ~TIM_CR1_CEN;       // Stop timer
+    TIM2->CNT = 0;                   // Reset counter
+    TIM2->ARR = interval;            // Update ARR
+    TIM2->EGR |= TIM_EGR_UG;         // Force update event to load ARR
+    TIM2->CR1 |= TIM_CR1_CEN;        // Restart timer
 }
 
 // One-shot timer function
 void timer_one_shot(uint32_t delay, CallbackFunction callback) {
 	// Set the delay and callback function
 	timerCallback = callback;
-	isOneShot = true;
+//	isOneShot = true;
 	
 	TIM2->CNT = 0;      // Reset the timer counter
 	TIM2->ARR = delay;  // Reload the ARR register with the new interval
@@ -69,7 +77,9 @@ int timerdemo(int interval) {
 	for (volatile int i = 0; i < 5000; i++) {
 	}
 
-	timer_reset(interval);	// Change the interval
+	int bufferInterval = interval;
+
+	timer_reset(100);	// Change the interval
 
 //	while (1) {}
 }

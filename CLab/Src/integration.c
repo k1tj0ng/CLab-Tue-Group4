@@ -2,6 +2,7 @@
 
 #include "stm32f303xc.h"
 #include "serial.h"
+#include "timer.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -81,11 +82,12 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
         handleNumericCommand("LED", value);
     }
     else if(strcasecmp(command, "timer") == 0) {
-    	timerdemo(value);
         handleNumericCommand("TIMER", value);
+    	timerdemo(value);
     }
     else if(strcasecmp(command, "oneshot") == 0) {
     	handleNumericCommand("ONESHOT", value);
+    	timer_one_shot(value, timerCallback);
     }
     else if(strcasecmp(command, "serial") == 0) {
         handleSerial(value);
@@ -95,6 +97,6 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
         SerialOutputString((uint8_t*)command, &USART1_PORT);
         SerialOutputString((uint8_t*)"\n", &USART1_PORT);
     }
-
+    SerialOutputString((uint8_t*)"\n", &USART1_PORT);
     memset(buffers[bufIndex], 0, BUFFER);
 }
