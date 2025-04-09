@@ -81,10 +81,11 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
         handleNumericCommand("LED", value);
     }
     else if(strcasecmp(command, "timer") == 0) {
+    	timerdemo(value);
         handleNumericCommand("TIMER", value);
     }
     else if(strcasecmp(command, "oneshot") == 0) {
-        handleNumericCommand("ONESHOT", value);
+    	handleNumericCommand("ONESHOT", value);
     }
     else if(strcasecmp(command, "serial") == 0) {
         handleSerial(value);

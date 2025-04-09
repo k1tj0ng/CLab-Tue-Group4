@@ -2,6 +2,7 @@
 #include "stm32f303xc.h"
 #include <serial.h>
 #include <string.h>
+#include <timer.h>
 
 
 // Global variables (volatile for ISR safety)
@@ -27,7 +28,7 @@ void USART1_EXTI25_IRQHandler(void) {
         }
 
         // Echo back (optional)
-//        SerialOutputChar(data, &USART1_PORT);
+        SerialOutputChar(data, &USART1_PORT);
 
         if (data == '\n' || data == '\r') {
             // Terminate string and mark buffer ready
@@ -45,5 +46,13 @@ void USART1_EXTI25_IRQHandler(void) {
             // Store regular character
             strings[activeIndex][writePos++] = data;
         }
+    }
+}
+
+// Timer interrupt handler for TIM2
+void TIM2_IRQHandler(void) {
+    if (TIM2->SR & TIM_SR_UIF) {  // Check if the interrupt flag is raised
+        TIM2->SR &= ~TIM_SR_UIF;  // Clear the interrupt flag
+        timerCallback();  // Execute the callback function
     }
 }

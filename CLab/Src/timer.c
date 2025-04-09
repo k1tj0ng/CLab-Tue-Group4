@@ -1,18 +1,13 @@
-#include "stm32f303xc.h"
 #include "timer.h"
-#include <stddef.h>
+
+#include "stm32f303xc.h"
 #include "setup.h"
+#include "handler.h"
+
+#include <stddef.h>
 
 //Define the callback function
-static CallbackFunction timerCallback = NULL;
-
-// Timer interrupt handler for TIM2
-void TIM2_IRQHandler(void) {
-    if (TIM2->SR & TIM_SR_UIF) {  // Check if the interrupt flag is raised
-        TIM2->SR &= ~TIM_SR_UIF;  // Clear the interrupt flag
-        timerCallback();  // Execute the callback function
-    }
-}
+CallbackFunction timerCallback = NULL;
 
 // Timer that trigger the callback (blink LED) every x millisecond
 void timer_init(uint32_t interval, CallbackFunction callback) {
@@ -39,4 +34,28 @@ void timer_reset(uint32_t interval) {
 
     // Re-initialize the timer
     timer_init(interval, timerCallback);
+}
+
+void blink_leds(void) {
+	// This function will be called if there is a timer overflow
+	static uint8_t led_state = 0;
+	GPIOE->ODR = led_state ? 0xFF00 : 0x0000;  // Toggle LEDs on PE8-PE15
+	led_state = !led_state;  // Flip the state
+}
+
+
+int timerdemo(int interval) {
+	enable_clocks();
+	initialise_board();
+
+	// Timer that triggers the callback (blink LED) every x millisecond
+	timer_init((uint32_t)interval, blink_leds); // Input the time interval in millisecond
+
+	// Delay for a few seconds or do something
+	for (volatile int i = 0; i < 5000; i++) {
+	}
+
+	timer_reset(interval);	// Change the interval
+
+//	while (1) {}
 }

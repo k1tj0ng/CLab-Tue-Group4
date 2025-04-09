@@ -6,6 +6,8 @@
 
 void USART1_EXTI25_IRQHandler();
 
+void TIM2_IRQHandler();
+
 extern volatile uint16_t writePos;     // Current write position
 extern volatile bool bufferReady;
 
