@@ -191,8 +191,10 @@ The timer module allows you to:
 3. **Trigger a one-shot event**, where the timer triggers a callback once and then stops.
 
 ### Valid input
-1. **Interval for Periodic Timer**: The `interval` parameter passed to the `timer_init` function specifies the time period in milliseconds at which the callback will be executed. Valid inputs are positive integer values that represent the time in milliseconds.
-2. **Delay for One-Shot Timer**: The `delay` parameter passed to the `timer_one_shot` function specifies the time in milliseconds before triggering the callback once. It should also be a positive integer.
+1. **Interval for Periodic Timer**
+   The `interval` parameter passed to the `timer_init` function specifies the time period in milliseconds at which the callback will be executed. Valid inputs are positive integer values that represent the time in milliseconds.
+2. **Delay for One-Shot Timer**
+   The `delay` parameter passed to the `timer_one_shot` function specifies the time in milliseconds before triggering the callback once. It should also be a positive integer.
 
 ### Functions and modularity
 1. **`timer_init(uint32_t interval, CallbackFunction callback)`**:
@@ -214,12 +216,12 @@ The timer module allows you to:
     - If the one-shot mode is active, it disables the timer after executing the callback to stop it from continuing.
 
 ### Testing
-To test the functionality of the timer module, the following steps used:
+To test the functionality of the timer module, the following steps were used:
 1. **Test Periodic Timer**:
-   - Initialize the timer with a specific interval (e.g., 100 ms) and a callback function that swap the state of LED. Verify that the callback is executed at the expected interval.
+   - Initialize the timer with a specific interval (e.g., 100 ms) and a callback function that swaps the state of the LED. Verify that the callback is executed at the expected interval.
    - Test with another time interval.
 2. **Test Timer Reset**:
-    - Use the periodic timer for a certain amount of time (use the for loop to waste some times)
+    - Use the periodic timer for a certain amount of time (use the for loop to waste some time)
     - Call `timer_reset` with a different interval and verify that the timer now triggers the callback at the new interval. Ensure that the timer continues to function after the reset.
 3. **Test One-Shot Timer**:
     - Call `timer_one_shot` with a delay and verify that the callback is executed exactly once after the specified time. Ensure that the timer stops after triggering the callback and does not repeat.
