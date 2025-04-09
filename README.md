@@ -22,14 +22,14 @@ Using C to interact with the microcontroller. Unlike last project, we aim to tac
 
 <details open>
 <summary>📑 Table of Contents</summary>
-- [Exercise 1 - Digital I/0](## Exercise 1 - Digital I/0)
-- [Exercise 2 - Serial Interfaces](## Exercise 2 - Serial Interfaces)
-- [Exercise 3 - Timer Interfaces](## Exercise 3 - Timer Interfaces)
-- [Exercise 4 - Integration](#Exercise 4 - Integration)
+	- [Exercise 1 - Digital I/O](#exercise-1---digital-io)
+	- [Exercise 2 - Serial Interfaces](#exercise-2---serial-interfaces)
+	- [Exercise 3 - Timer Interfaces](#exercise-3---timer-interfaces)
+	- [Exercise 4 - Integration](#exercise-4---integration)
 </details>
 
 
-## Exercise 1 - Digital I/0
+## Exercise 1 - Digital I/O
 
 ### Summary
 
@@ -43,7 +43,7 @@ Using C to interact with the microcontroller. Unlike last project, we aim to tac
 
 ### Notes
 
-[↑ Back to Top](## 🔍 Project Overview)
+[↑ Back to Top](#Project Overview)
 
 ## Exercise 2 - Serial Interfaces
 
