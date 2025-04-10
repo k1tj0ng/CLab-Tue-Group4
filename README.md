@@ -312,11 +312,12 @@ The commands are more or less the same as exercises 1, 2, and 3. Here is a brief
 
 ### Functions and modularity
 #### 1. "**integration.c**"
-This module is designed to handle the main process of the program with the use of several functions. It branches to other function depending on the string entered by the user in the serial port. We also introduce constant variables within the module 
-``
+This module is designed to handle the main process of the program with the use of several functions. It branches to other function depending on the string entered by the user in the serial port. We also introduce constant variables within the module.
+```
 int maxInputLength = 32;
 int serialCommand = 0;
-``
+```
+
 i. **`sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex)`**
 - This function's task is to read the user's input and decide which function is to be called next
 - The following code snippets will be divided into parts for simplicity
@@ -443,7 +444,10 @@ void handleSerial(const char* value) {
     }
 }
 ```
-- 
+- Afterwards, it checks if the length of the string is within a specified value.
+- If it is, it can then print out the string stored in `value` to the serial output, effectively transmitting the user's input back.
+
+
 #### 2. "**interrupts.c**"
 There are a few interrupts that are used within this integrated program. The following are the functions used to set the conditions of triggering the interrupt, and enabling it:
 i. **`UARTenableInterrupts()`**
