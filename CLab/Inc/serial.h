@@ -1,7 +1,6 @@
 #ifndef SERIAL_PORT_HEADER
 #define SERIAL_PORT_HEADER
 
-
 #include <stdint.h>
 
 #define BUFFER 32

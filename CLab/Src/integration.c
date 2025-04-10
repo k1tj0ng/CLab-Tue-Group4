@@ -10,13 +10,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-int maxInputLength = 32;
-int serialCommand = 0;
-
 // Long int command handler
 void handleNumericCommand(const char* name, const char* value) {
-    if(value == NULL) {
-        char msg[maxInputLength];
+    if(value == NULL){
+        char msg[BUFFER];
         sprintf(msg, "Error: %s needs value\n", name);
         SerialOutputString((uint8_t*)msg, &USART1_PORT);
         return;
@@ -28,7 +25,7 @@ void handleNumericCommand(const char* name, const char* value) {
     if(*endptr != '\0' || num < 0) {
         SerialOutputString((uint8_t*)"Error: Invalid number\n", &USART1_PORT);
     } else {
-        char msg[maxInputLength];
+        char msg[BUFFER];
         sprintf(msg, "%s: %ld\n", name, num);
         SerialOutputString((uint8_t*)msg, &USART1_PORT);
     }
@@ -41,7 +38,7 @@ void handleSerial(const char* value) {
         return;
     }
 
-    if(strlen(value) > maxInputLength) {
+    if(strlen(value) > BUFFER) {
         SerialOutputString((uint8_t*)"Error: Max 32 chars\n", &USART1_PORT);
     } else {
         SerialOutputString((uint8_t*)"SERIAL: ", &USART1_PORT);
