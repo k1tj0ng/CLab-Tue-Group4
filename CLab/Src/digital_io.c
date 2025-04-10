@@ -57,7 +57,10 @@ void set_led_state(uint16_t state) {
 	led_state = state;
 	enable_clocks();
 	initialise_board();
-	GPIOE->ODR = (GPIOE->ODR & 0x00FF) | (state << 8); // set led state
+	GPIOE->ODR &= ~(0xFF << 8);       // Clear bits 8–15 (LEDs)
+	GPIOE->ODR |= (state << 8);       // Set new LED state
+
+//	GPIOE->ODR = (GPIOE->ODR & 0x00FF) | (state << 8); // set led state
 }
 
 // function that gets the led state
