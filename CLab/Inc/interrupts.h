@@ -3,4 +3,6 @@
 
 void UARTenableInterrupts();
 
+void LEDenableInterrupts();
+
 #endif

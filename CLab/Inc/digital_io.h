@@ -15,4 +15,6 @@ void set_led_state(uint16_t state);
 // Gets the current state of the LEDs
 void get_led_state(void);
 
+//void (*on_button_press)();
+
 #endif // DIGITAL_IO_H

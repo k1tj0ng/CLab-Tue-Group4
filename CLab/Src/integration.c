@@ -3,6 +3,7 @@
 #include "stm32f303xc.h"
 #include "serial.h"
 #include "timer.h"
+#include "digital_io.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -80,6 +81,7 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
     // Command processing
     if(strcasecmp(command, "led") == 0) {
         handleNumericCommand("LED", value);
+        set_led_state((uint16_t)value);
     }
     else if(strcasecmp(command, "timer") == 0) {
         handleNumericCommand("TIMER", value);

@@ -12,4 +12,3 @@ void initialise_board() {
     uint16_t *led_output_registers = ((uint16_t *)&(GPIOE->MODER)) + 1;
     *led_output_registers = 0x5555;  // Set PE8-PE15 as output
 }
-

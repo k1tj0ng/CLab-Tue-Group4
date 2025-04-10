@@ -3,6 +3,7 @@
 #include <serial.h>
 #include <string.h>
 #include <timer.h>
+#include <digital_io.h>
 
 
 // Global variables (volatile for ISR safety)
@@ -55,4 +56,23 @@ void TIM2_IRQHandler(void) {
         TIM2->SR &= ~TIM_SR_UIF;  // Clear the interrupt flag
         timerCallback();  // Execute the callback function
     }
+}
+
+// LED interrupt
+//void EXTI0_IRQHandler(void)
+//{
+//	// run the button press handler (make sure it is not null first !)
+//	if (on_button_press != 0x00) {
+//		on_button_press();
+//	}
+//
+//	// reset the interrupt (so it doesn't keep firing until the next trigger)
+//	EXTI->PR |= EXTI_PR_PR0;
+//}
+
+void TIM2_IRQHandler_chaseled() {
+    if ((TIM2->SR & TIM_SR_UIF) !=0){
+    		chase_led();					// Check if update interrupt
+    }
+        TIM2->SR &= ~TIM_SR_UIF;            // Clear update interrupt flag
 }
