@@ -15,8 +15,6 @@ void TIM2_IRQHandler(void);
 // Reset the timer with the current interval
 void timer_reset(uint32_t interval);
 
-typedef void (*CallbackFunction)(void); // Make sure this typedef is here or included
-
 extern CallbackFunction timerCallback;
 
 int timerdemo(int interval);
