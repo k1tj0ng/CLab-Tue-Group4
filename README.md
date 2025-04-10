@@ -312,8 +312,13 @@ The commands are more or less the same as exercises 1, 2, and 3. Here is a brief
 
 ### Functions and modularity
 #### 1. "**integration.c**"
-This module is designed to handle the main process of the program with the use of several functions. It branches to other function depending on the string entered by the user in the serial port. 
-i. `sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex)`
+This module is designed to handle the main process of the program with the use of several functions. It branches to other function depending on the string entered by the user in the serial port. We also introduce constant variables within the module.
+```
+int maxInputLength = 32;
+int serialCommand = 0;
+```
+
+i. **`sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex)`**
 - This function's task is to read the user's input and decide which function is to be called next
 - The following code snippets will be divided into parts for simplicity
 ```
@@ -383,9 +388,69 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
 - Using if-else statements, we then compare `command` with several different keywords that refers to the function it should call afterwards.
 - Once it matches one of the keywords, it calls the designated function, taking `value` as a parameter.
 
+ii. **`handleNumericCommand(const char* name, const char* value)`**
+- From our sorting function, we get a variable `value` which should be the second part of the user's input.
+- If `command` is either "led", "timer", or "oneshot", then this function is called to handle `value`.
+```
+void handleNumericCommand(const char* name, const char* value) {
+    if(value == NULL) {
+        char msg[maxInputLength];
+        sprintf(msg, "Error: %s needs value\n", name);
+        SerialOutputString((uint8_t*)msg, &USART1_PORT);
+        return;
+    }
+```
+- The if block statement above ensures that the variable `value` has data in it.
+- If the user's input does not have 2 parts, then automatically, `value` is set to NULL.
+- If so, then an error is printed into the serial output.
+
+```
+    char* endptr;
+    long num = strtol(value, &endptr, 10);
+```
+- This section basically converts the string into a long integer in decimals.
+  
+```
+    if(*endptr != '\0' || num < 0) {
+        SerialOutputString((uint8_t*)"Error: Invalid number\n", &USART1_PORT);
+    } else {
+        char msg[maxInputLength];
+        sprintf(msg, "%s: %ld\n", name, num);
+        SerialOutputString((uint8_t*)msg, &USART1_PORT);
+    }
+}
+```
+- The last if-else statement checks if the string has succesfully been converted and if the numerical value is logical or not.
+- If so, it then outputs the command and value to the serial output.
+
+iii. **`handleSerial(const char* value)`**
+- This function is called when `command` is "serial"
+```
+void handleSerial(const char* value) {
+    if(value == NULL) {
+        SerialOutputString((uint8_t*)"Error: SERIAL needs string\n", &USART1_PORT);
+        return;
+    }
+```
+- Similar to `handleNumericCommand` function, the if statement above, checks if `value` has data.
+- If not, it prints an error message to the serial output.
+```
+    if(strlen(value) > maxInputLength) {
+        SerialOutputString((uint8_t*)"Error: Max 32 chars\n", &USART1_PORT);
+    } else {
+        SerialOutputString((uint8_t*)"SERIAL: ", &USART1_PORT);
+        SerialOutputString((uint8_t*)value, &USART1_PORT);
+        SerialOutputString((uint8_t*)"\n", &USART1_PORT);
+    }
+}
+```
+- Afterwards, it checks if the length of the string is within a specified value.
+- If it is, it can then print out the string stored in `value` to the serial output, effectively transmitting the user's input back.
+
+
 #### 2. "**interrupts.c**"
 There are a few interrupts that are used within this integrated program. The following are the functions used to set the conditions of triggering the interrupt, and enabling it:
-i. `UARTenableInterrupts()`
+i. **`UARTenableInterrupts()`**
 - Taken from exercise 2, this interrupt would be generated when a data is received by the UART
 ```
 	// Generate an interrupt upon receiving data
@@ -396,7 +461,7 @@ i. `UARTenableInterrupts()`
 	NVIC_EnableIRQ(USART1_IRQn);
 ```
 
-ii. `timer_init(uint32_t interval, CallbackFunction callback)`
+ii. **`timer_init(uint32_t interval, CallbackFunction callback)`**
 - Taken from exercise 3, this interrupt would be generated when overflows occur (timer count resets to 0)
 ```
 	// Enable interrupt when there is overflow
@@ -414,7 +479,7 @@ volatile bool bufferReady = false;     // Data ready flag
 ```
 `bufferReady` will then be used later on in the main function as a flag. 
 
-i. `USART1_EXTI25_IRQHandler()`
+i. **`USART1_EXTI25_IRQHandler()`**
 - Taken from exercise 2, the handler function differs in the data checking part
 ```
 if (data == '\n' || data == '\r') {
@@ -434,7 +499,7 @@ if (data == '\n' || data == '\r') {
 - The code above checks if the received string is `\n` or `\r` as it signals the end of a message.
 - If so, `bufferReady` is set to 1, signaling that it is ready to be processed in the main function.
 
-ii. `TIM2_IRQHandler()`
+ii. **`TIM2_IRQHandler()`**
 - Taken from exercise 3, there is no change in the function.
 - 
 
