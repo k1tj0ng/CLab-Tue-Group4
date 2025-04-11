@@ -43,13 +43,13 @@ put in summary
 This exercise involves using the UART ports to receive and transmit data. It has a similar concept with the assembly code but using C allows us to use a different approach to check the data registers through the use of interrupts. Unlike polling, which loops to check the register values, these interrupts allows us to sort of multitask by pausing its current work and jumps into a specific function (ISR). We will use this concept to receive and transmit data given to the UART.
 
 ### Usage (Instructions)
-The serial module allows you to:
-	1. **Receive data** that is typed by the user from the serial emulator 
-	2. **Store data** into a variable or buffer
-	3. **Transmit data** back to the serial port
+The serial module allows you to:  
+1. **Receive data** that is typed by the user from the serial emulator
+2. **Store data** into a variable or buffer
+3. **Transmit data** back to the serial port
 
 ### Functions and modularity
-1. Initialising GPIO and USART
+1. **Initialising GPIO and USART**
 ```
 void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*completion_function)(uint32_t)) {
 	serial_port->completion_function = completion_function;
@@ -107,7 +107,7 @@ void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*complet
 ```
 This is taken from the project **W06-UART-modular-design**.
 
-2. Receive Data
+2. **Receive Data**  
 For parts a and b of this exercise, we use a polling approach to receive the data being sent over the serial port.
 ```
 uint8_t SerialInputChar(SerialPort *serial_port) {
@@ -145,7 +145,7 @@ void SerialInputString(uint8_t *buffer, uint8_t terminator, SerialPort *serial_p
 ```
 This function is not really efficient since it loops to check, if the controller is ready to receive data or not. Hence, in part c, we changed the serial receiving process with an interrupt based approach.
 
-3. Interrupts
+3. **Interrupts**  
 Once we got our GPIO pins ready, we then set a specific interrupt function. This basically means telling the controller to generate an interrupt when a specific event that we set occurs. In this case, it is when we receive data in the UART module.
 ```
 void enableInterrupts() {
@@ -206,11 +206,12 @@ void USART1_EXTI25_IRQHandler(void) {
     }
 }
 ```
-This function, called the Interrupt Service Routine (ISR), essentialy handles the event. When it is called, the received data will then be stored in a buffer storage. Afterwards, it transmits the data back to the user.
+This function, called the Interrupt Service Routine (ISR), essentialy handles the event. When it is called, the received data will then be stored in a buffer storage. Afterwards, it transmits the data back to the user.  
+
 Advanced Functionality:
 - Double buffer used which allows the program to take in another string without intervening the interrupt process
 
-4. Outputs
+4. **Outputs**  
 To output the function, we used a function called SerialOutputString and SerialOutputChar (from the lecture) that takes in the list of characters (array) as parameters and outputs the list to PuTTy or other terminal software.
 ```
 void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
