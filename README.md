@@ -118,7 +118,7 @@ The serial module allows you to:
 
 ### Functions and modularity
 1. **Initialising GPIO and USART**
-```
+```cpp
 void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*completion_function)(uint32_t)) {
 	serial_port->completion_function = completion_function;
 
@@ -177,7 +177,7 @@ This is taken from the project **W06-UART-modular-design**.
 
 2. **Receive Data**  
 For parts a and b of this exercise, we use a polling approach to receive the data being sent over the serial port.
-```
+```cpp
 uint8_t SerialInputChar(SerialPort *serial_port) {
     // Wait until data is received
     while((serial_port->UART->ISR & USART_ISR_RXNE) == 0) {
@@ -215,7 +215,7 @@ This function is not really efficient since it loops to check, if the controller
 
 3. **Interrupts**  
 Once we got our GPIO pins ready, we then set a specific interrupt function. This basically means telling the controller to generate an interrupt when a specific event that we set occurs. In this case, it is when we receive data in the UART module.
-```
+```cpp
 void enableInterrupts() {
 	// Interrupts disabled so that process is not intervened
 	__disable_irq();
@@ -232,7 +232,7 @@ void enableInterrupts() {
 }
 ```
 Now, whenever the receiving bit of the UART sends a flag saying that it has received data, the interrupt is generated and the controller will automatically jump to the interrupt handler function shown below.
-```
+```cpp
 void USART1_EXTI25_IRQHandler(void) {
     // Check for errors first (clears them automatically on read)
     if (USART1->ISR & (USART_ISR_FE | USART_ISR_ORE)) {
@@ -281,7 +281,7 @@ Advanced Functionality:
 
 4. **Outputs**  
 To output the function, we used a function called SerialOutputString and SerialOutputChar (from the lecture) that takes in the list of characters (array) as parameters and outputs the list to PuTTy or other terminal software.
-```
+```cpp
 void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
 
 	while((serial_port->UART->ISR & USART_ISR_TXE) == 0){
@@ -307,7 +307,7 @@ void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 
 ### Testing
 Testing is done through the use of serial terminal emulators such as PuTTY or CuteCom. After setting it up, type in anything to the emulator. When finished, type in the terminating character. We can then check if data is received in the UART by debugging the code and stepping through it line by line. We can also print out statements in the serial port by using our serial output function in certain blocks to check if the flow is running correctly. The example is shown below
-```
+```cpp
 code in here (put the one for error checking like SerialOutputString("message received)
 ```
 
@@ -335,7 +335,7 @@ The timer module allows you to:
    - This function initializes the timer with a specified interval (in milliseconds) and a callback function.
    - It sets up the timer’s prescaler, auto-reload register (ARR), and enables the timer interrupt.
    - The callback function is stored for later execution when the timer overflows.
-```
+```cpp
 void timer_init(uint32_t interval, CallbackFunction callback) {
 	// Set up the timer prescaler
 	TIM2->PSC = 7999;  // (8MHz:1000)-1
@@ -356,7 +356,7 @@ void timer_init(uint32_t interval, CallbackFunction callback) {
 2. **`timer_reset(uint32_t interval)`**:
     - This function resets the timer with a new interval.
     - It resets the counter, updates the ARR register, and re-starts the timer.
-```
+```cpp
 void timer_reset(uint32_t interval) {
     TIM2->CR1 &= ~TIM_CR1_CEN;       // Stop timer
     TIM2->CNT = 0;                   // Reset counter
@@ -369,7 +369,7 @@ void timer_reset(uint32_t interval) {
 3. **`timer_one_shot(uint32_t delay, CallbackFunction callback)`**:
     - This function sets the timer for a one-shot event, meaning the timer triggers the callback once after the specified delay and then stops.
     - It uses a flag (`isOneShot`) to indicate that the timer should stop after one callback.
-```
+```cpp
 void timer_one_shot(uint32_t delay, CallbackFunction callback) {
 	// Set the delay and callback function
 	timerCallback = callback;
@@ -388,7 +388,7 @@ void timer_one_shot(uint32_t delay, CallbackFunction callback) {
     - This interrupt handler is triggered whenever the timer (TIM2) overflows.
     - It checks the interrupt flag, clears it, and executes the stored callback function.
     - If the one-shot mode is active, it disables the timer after executing the callback to stop it from continuing.
-```
+```cpp
 void TIM2_IRQHandler(void) {
     if (TIM2->SR & TIM_SR_UIF) {  // Check if the interrupt flag is raised
         TIM2->SR &= ~TIM_SR_UIF;  // Clear the interrupt flag
@@ -451,7 +451,7 @@ This module is designed to handle the main process of the program with the use o
 i. **`sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex)`**
 - This function's task is to read the user's input and decide which function is to be called next
 - The following code snippets will be divided into parts for simplicity
-```
+```cpp
 void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
     char* input = buffers[bufIndex];
 
@@ -469,7 +469,7 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
 ```
 - The code above essentially cleans the string received by removing any trailing/leading whitespaces and sorts.
 - It also adds a null terminating character `\0` at the end of the string.
-```
+```cpp
     // Extract command and value
     char* command = cmdStart;
     char* value = strchr(cmdStart, ' ');
@@ -482,7 +482,7 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
 - `command` refers to the first part of the string.
 - `value` refers to the second part of the string.
 
-```
+```cpp
     // Debug print
 	SerialOutputString((uint8_t*)"\nProcessing: [", &USART1_PORT);
 	SerialOutputString((uint8_t*)cmdStart, &USART1_PORT);
@@ -490,7 +490,7 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
 ```
 - To make the process cleaner, a statement is printed through the serial port.
 
-```
+```cpp
     // Command processing
     if(strcasecmp(command, "led") == 0) {
         handleNumericCommand("LED", value);
@@ -521,7 +521,7 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
 ii. **`handleNumericCommand(const char* name, const char* value)`**
 - From our sorting function, we get a variable `value` which should be the second part of the user's input.
 - If `command` is either "led", "timer", or "oneshot", then this function is called to handle `value`.
-```
+```cpp
 void handleNumericCommand(const char* name, const char* value) {
     if(value == NULL) {
         char msg[BUFFER];
@@ -534,13 +534,13 @@ void handleNumericCommand(const char* name, const char* value) {
 - If the user's input does not have 2 parts, then automatically, `value` is set to NULL.
 - If so, then an error is printed into the serial output.
 
-```
+```cpp
     char* endptr;
     long num = strtol(value, &endptr, 10);
 ```
 - This section basically converts the string into a long integer in decimals.
   
-```
+```cpp
     if(*endptr != '\0' || num < 0) {
         SerialOutputString((uint8_t*)"Error: Invalid number\n", &USART1_PORT);
     } else {
@@ -555,7 +555,7 @@ void handleNumericCommand(const char* name, const char* value) {
 
 iii. **`handleSerial(const char* value)`**
 - This function is called when `command` is "serial"
-```
+```cpp
 void handleSerial(const char* value) {
     if(value == NULL) {
         SerialOutputString((uint8_t*)"Error: SERIAL needs string\n", &USART1_PORT);
@@ -564,7 +564,7 @@ void handleSerial(const char* value) {
 ```
 - Similar to `handleNumericCommand` function, the if statement above, checks if `value` has data.
 - If not, it prints an error message to the serial output.
-```
+```cpp
     if(strlen(value) > BUFFER) {
         SerialOutputString((uint8_t*)"Error: Max 32 chars\n", &USART1_PORT);
     } else {
@@ -582,7 +582,7 @@ void handleSerial(const char* value) {
 There are a few interrupts that are used within this integrated program. The following are the functions used to set the conditions of triggering the interrupt, and enabling it:
 i. **`UARTenableInterrupts()`**
 - Taken from exercise 2, this interrupt would be generated when a data is received by the UART
-```
+```cpp
 	// Generate an interrupt upon receiving data
 	USART1->CR1 |= USART_CR1_RXNEIE_Msk;
 
@@ -594,7 +594,7 @@ i. **`UARTenableInterrupts()`**
 ii. **`LEDenableInterrupts()`**
 - Taken from exercise 1, this interrupt would be generated when the user button is pressed (rising edge).
 - This effectively means that when the bit on PA0 goes from 0 to 1, an interrupt is triggered.
-```
+```cpp
 	// Enable the system configuration controller (SYSCFG in RCC)
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 
@@ -619,7 +619,7 @@ ii. **`LEDenableInterrupts()`**
 
 #### 3. "**handler.c**"
 For this specific integrated program, we introduce new global variables:
-```
+```cpp
 volatile uint16_t writePos = 0;       // Current write position
 volatile bool bufferReady = false;     // Data ready flag
 ```
@@ -627,7 +627,7 @@ volatile bool bufferReady = false;     // Data ready flag
 
 i. **`USART1_EXTI25_IRQHandler()`**
 - Taken from exercise 2, the handler function differs in the data checking part
-```
+```cpp
 if (data == '\n' || data == '\r') {
 	// Terminate string and mark buffer ready
 	strings[activeIndex][writePos] = '\0';
@@ -654,7 +654,7 @@ iii. **` `**
 #### 4. "**setup.c**"
 - This module is used for enabling the clocks.
 - It also initialises the discovery board I/O.
-```
+```cpp
 // Enable the clocks for GPIOE and TIM2
 void enable_clocks() {
     RCC->AHBENR |= RCC_AHBENR_GPIOEEN;  // Enable the GPIOE clock
