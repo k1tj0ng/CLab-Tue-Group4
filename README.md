@@ -19,10 +19,12 @@
 
 ## 🔍 Project Overview
 Using C to interact with the microcontroller. Unlike last project, we aim to tackle the problems using interrupts instead of polling. This provides a more efficient way of processing our programs.
+**Note:** All *header* files have been correctly initialised but not included in the documentation for simplicity.
 
 ## Exercise 1 - Digital I/O
 
 ### Summary
+put in summary
 
 ### Usage
 
@@ -40,8 +42,73 @@ Using C to interact with the microcontroller. Unlike last project, we aim to tac
 ### Summary Overview
 This exercise involves using the UART ports to receive and transmit data. It has a similar concept with the assembly code but using C allows us to use a different approach to check the data registers through the use of interrupts. Unlike polling, which loops to check the register values, these interrupts allows us to sort of multitask by pausing its current work and jumps into a specific function (ISR). We will use this concept to receive and transmit data given to the UART.
 
-### Usage
-For part a and b of this exercise, we use a polling approach to receive the data being sent over the serial port.
+### Usage (Instructions)
+The serial module allows you to:
+	1. **Receive data** that is typed by the user from the serial emulator 
+	2. **Store data** into a variable or buffer
+	3. **Transmit data** back to the serial port
+
+### Functions and modularity
+1. Initialising GPIO and USART
+```
+void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*completion_function)(uint32_t)) {
+	serial_port->completion_function = completion_function;
+
+	// enable clock power, system configuration clock and GPIOC
+	// common to all UARTs
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+
+	// enable the GPIO which is on the AHB bus
+	RCC->AHBENR |= serial_port->MaskAHBENR;
+
+	// set pin mode to alternate function for the specific GPIO pins
+	serial_port->GPIO->MODER = serial_port->SerialPinModeValue;
+
+	// enable high speed clock for specific GPIO pins
+	serial_port->GPIO->OSPEEDR = serial_port->SerialPinSpeedValue;
+
+	// set alternate function to enable USART to external pins
+	serial_port->GPIO->AFR[0] |= serial_port->SerialPinAlternatePinValueLow;
+	serial_port->GPIO->AFR[1] |= serial_port->SerialPinAlternatePinValueHigh;
+
+	// enable the device based on the bits defined in the serial port definition
+	RCC->APB1ENR |= serial_port->MaskAPB1ENR;
+	RCC->APB2ENR |= serial_port->MaskAPB2ENR;
+
+	// Get a pointer to the 16 bits of the BRR register that we want to change
+	uint16_t *baud_rate_config = (uint16_t*)&serial_port->UART->BRR; // only 16 bits used!
+
+	// Baud rate calculation from datasheet
+	switch(baudRate){
+	case BAUD_9600:
+		// NEED TO FIX THIS !
+		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		break;
+	case BAUD_19200:
+		// NEED TO FIX THIS !
+		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		break;
+	case BAUD_38400:
+		// NEED TO FIX THIS !
+		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		break;
+	case BAUD_57600:
+		// NEED TO FIX THIS !
+		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		break;
+	case BAUD_115200:
+		*baud_rate_config = 0x46;  // 115200 at 8MHz
+		break;
+	}
+	// enable serial port for tx and rx
+	serial_port->UART->CR1 |= USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
+}
+```
+This is taken from the project **W06-UART-modular-design**.
+
+2. Receive Data
+For parts a and b of this exercise, we use a polling approach to receive the data being sent over the serial port.
 ```
 uint8_t SerialInputChar(SerialPort *serial_port) {
     // Wait until data is received
@@ -78,9 +145,8 @@ void SerialInputString(uint8_t *buffer, uint8_t terminator, SerialPort *serial_p
 ```
 This function is not really efficient since it loops to check, if the controller is ready to receive data or not. Hence, in part c, we changed the serial receiving process with an interrupt based approach.
 
-### Functions and modularity
-1. Interrupts
-The first thing that we need to do when setting up interrupts is to enable the peripherals needed. Afterwards, we need to set a specific interrupt function. This basically means telling the controller to generate an interrupt when a specific event that we set occurs. In this case, it is when we receive data in the UART module.
+3. Interrupts
+Once we got our GPIO pins ready, we then set a specific interrupt function. This basically means telling the controller to generate an interrupt when a specific event that we set occurs. In this case, it is when we receive data in the UART module.
 ```
 void enableInterrupts() {
 	// Interrupts disabled so that process is not intervened
@@ -118,8 +184,9 @@ void USART1_EXTI25_IRQHandler(void) {
         }
 
         // Echo back (optional)
-//	SerialOutputChar(data, &USART1_PORT);
+	// SerialOutputChar(data, &USART1_PORT);
 
+	// Double buffer in action
         if (data == '\n' || data == '\r') {
             // Terminate string and mark buffer ready
             strings[activeIndex][writePos] = '\0';
@@ -140,8 +207,10 @@ void USART1_EXTI25_IRQHandler(void) {
 }
 ```
 This function, called the Interrupt Service Routine (ISR), essentialy handles the event. When it is called, the received data will then be stored in a buffer storage. Afterwards, it transmits the data back to the user.
+Advanced Functionality:
+- Double buffer used which allows the program to take in another string without intervening the interrupt process
 
-2. Outputs
+4. Outputs
 To output the function, we used a function called SerialOutputString and SerialOutputChar (from the lecture) that takes in the list of characters (array) as parameters and outputs the list to PuTTy or other terminal software.
 ```
 void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
@@ -168,14 +237,10 @@ void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 ```
 
 ### Testing
-Testing is done through the use of serial terminal emulators such as PuTTY or CuteCom. After setting it up, we can check if data is received in the UART by debugging the code and stepping through it line by line.
-We can also print out statements in the serial port by using our serial output function in certain blocks to check if the flow is running correctly. The example is shown below
+Testing is done through the use of serial terminal emulators such as PuTTY or CuteCom. After setting it up, type in anything to the emulator. When finished, type in the terminating character. We can then check if data is received in the UART by debugging the code and stepping through it line by line. We can also print out statements in the serial port by using our serial output function in certain blocks to check if the flow is running correctly. The example is shown below
 ```
 code in here (put the one for error checking like SerialOutputString("message received)
 ```
-
-### Usage (Instructions)
-To start, set up the serial terminal emulator and connect it with your microcontroller. Then type in anything to the emulator. When finished, type in the terminating character. This will then be received by the microcontroller and it will be transmitted back to the emulator, along with the length of the string that you typed in. 
 
 ### Notes
 
@@ -312,11 +377,7 @@ The commands are more or less the same as exercises 1, 2, and 3. Here is a brief
 
 ### Functions and modularity
 #### 1. "**integration.c**"
-This module is designed to handle the main process of the program with the use of several functions. It branches to other function depending on the string entered by the user in the serial port. We also introduce constant variables within the module.
-```
-int maxInputLength = 32;
-int serialCommand = 0;
-```
+This module is designed to handle the main process of the program with the use of several functions. It branches to other function depending on the string entered by the user in the serial port. Some modules are directly taken from previous exercise, resulting in no change within the module. 
 
 i. **`sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex)`**
 - This function's task is to read the user's input and decide which function is to be called next
@@ -394,7 +455,7 @@ ii. **`handleNumericCommand(const char* name, const char* value)`**
 ```
 void handleNumericCommand(const char* name, const char* value) {
     if(value == NULL) {
-        char msg[maxInputLength];
+        char msg[BUFFER];
         sprintf(msg, "Error: %s needs value\n", name);
         SerialOutputString((uint8_t*)msg, &USART1_PORT);
         return;
@@ -414,7 +475,7 @@ void handleNumericCommand(const char* name, const char* value) {
     if(*endptr != '\0' || num < 0) {
         SerialOutputString((uint8_t*)"Error: Invalid number\n", &USART1_PORT);
     } else {
-        char msg[maxInputLength];
+        char msg[BUFFER];
         sprintf(msg, "%s: %ld\n", name, num);
         SerialOutputString((uint8_t*)msg, &USART1_PORT);
     }
@@ -435,7 +496,7 @@ void handleSerial(const char* value) {
 - Similar to `handleNumericCommand` function, the if statement above, checks if `value` has data.
 - If not, it prints an error message to the serial output.
 ```
-    if(strlen(value) > maxInputLength) {
+    if(strlen(value) > BUFFER) {
         SerialOutputString((uint8_t*)"Error: Max 32 chars\n", &USART1_PORT);
     } else {
         SerialOutputString((uint8_t*)"SERIAL: ", &USART1_PORT);
@@ -461,15 +522,31 @@ i. **`UARTenableInterrupts()`**
 	NVIC_EnableIRQ(USART1_IRQn);
 ```
 
-ii. **`timer_init(uint32_t interval, CallbackFunction callback)`**
-- Taken from exercise 3, this interrupt would be generated when overflows occur (timer count resets to 0)
+ii. **`LEDenableInterrupts()`**
+- Taken from exercise 1, this interrupt would be generated when the user button is pressed (rising edge).
+- This effectively means that when the bit on PA0 goes from 0 to 1, an interrupt is triggered.
 ```
-	// Enable interrupt when there is overflow
-	TIM2->DIER |= TIM_DIER_UIE;
-	NVIC_EnableIRQ(TIM2_IRQn);
+	// Enable the system configuration controller (SYSCFG in RCC)
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+
+	// External Interrupts details on large manual page 294)
+	// PA0 is on interrupt EXTI0 large manual - page 250
+	// EXTI0 in  SYSCFG_EXTICR1 needs to be 0x00 (SYSCFG_EXTICR1_EXTI0_PA)
+	SYSCFG->EXTICR[0] = SYSCFG_EXTICR1_EXTI0_PA;
+
+	//  Select EXTI0 interrupt on rising edge
+	EXTI->RTSR |= EXTI_RTSR_TR0; // rising edge of EXTI line 0 (includes PA0)
+
+	// set the interrupt from EXTI line 0 as 'not masked' - as in, enable it.
+	EXTI->IMR |= EXTI_IMR_MR0;
+
+	// Tell the NVIC module that EXTI0 interrupts should be handled
+	NVIC_SetPriority(EXTI0_IRQn, 1);  // Set Priority
+	NVIC_EnableIRQ(EXTI0_IRQn);
+
 ```
 
-iii. `  `
+
 
 #### 3. "**handler.c**"
 For this specific integrated program, we introduce new global variables:
@@ -501,11 +578,36 @@ if (data == '\n' || data == '\r') {
 
 ii. **`TIM2_IRQHandler()`**
 - Taken from exercise 3, there is no change in the function.
-- 
 
-#### 4. LEDs Registers
-#### 5. Serial Registers
-#### 6. Timers Registers
+iii. **` `**
+
+
+#### 4. "**setup.c**"
+- This module is used for enabling the clocks.
+- It also initialises the discovery board I/O.
+```
+// Enable the clocks for GPIOE and TIM2
+void enable_clocks() {
+    RCC->AHBENR |= RCC_AHBENR_GPIOEEN;  // Enable the GPIOE clock
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // Enable the TIM2 clock
+}
+
+// Initialise the discovery board I/O
+void initialise_board() {
+    uint16_t *led_output_registers = ((uint16_t *)&(GPIOE->MODER)) + 1;
+    *led_output_registers = 0x5555;  // Set PE8-PE15 as output
+}
+``` 
+
+#### 5. "**serial.c**"
+- Taken from exercise 3, the contents of this module is not changed.
+
+
+#### 6. "**timer.c**"
+- Taken from exercise 4, the contents of this module is not changed.
+
+#### 7. "**digital_io.c**"
+- Taken from exercise 1, 
 
 ### Testing
 
