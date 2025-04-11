@@ -24,18 +24,86 @@ Using C to interact with the microcontroller. Unlike last project, we aim to tac
 ## Exercise 1 - Digital I/O
 
 ### Summary
-put in summary
+This exercises involves the usage of General-Purpose Input/Output (GPIO) pins to turn off and on LEDs through user-input via a button-press. This is done through using interrupts. All functions for initialisation, controlling LED state and restricting the duration of delay, are contained in digital_io.c, gpioe_config.c, handler.c, interrupts.c, and timer.c, and the functions are declared in their respective header files. All functions are called in the main function to maintain modularity. 
 
 ### Usage
+To use this module:
+1. Initialise interrupts, clocks and, GPIOs for LEDs output and button input. 
+2. Call `button_press` and `enable_interrupt` function to run when button is pressed where it generates an interrupt event.
+3. LED will light up when the button is pressed.
+4. Set integer number for delay.
+5. Call `enable_prescalar` function to enable timer 2 interrupt.
+6. Active LED will be shifted left by one bit every time the timer elapses which triggers an interrupt event. 
 
 ### Valid input
-
+Input any integer number as the duration for the delay. 
 ### Functions and modularity
+In digital_io.c the functions are: 
+```cpp
+void button_press(void(*callback)(void)){
+	on_button_press= callback;
+}
+```
+This function is responsible for taking any user-defined callback function to be called when an interrupt event is triggered, i.e. button press. 
 
+```cpp
+void chase_led(){
+	uint8_t *led_register = ((uint8_t*)&(GPIOE->ODR)) + 1;
+
+	*led_register <<= 1;
+	if (*led_register == 0) {
+		*led_register = 1;
+	}
+}
+```
+This function is responsible for shifting the LEDs by one bit to the left. 
+```cpp
+void enable_prescaler(int delay_value){
+
+	TIM2->ARR = 0x01;
+	TIM2->CNT = 0x00;
+	asm("NOP");
+	asm("NOP");
+	asm("NOP");
+	TIM2->ARR = 0xffffffff;
+	__disable_irq();
+
+	RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;    // Enable Timer 2 clock
+	TIM2->PSC = 7999;                       // Set prescaler to 7999
+	TIM2->ARR = 1000;                      // Set auto-reload for 1-second interval
+	TIM2->DIER |= TIM_DIER_UIE;            // Enable update interrupt
+    TIM2->CR1 |= TIM_CR1_CEN;              // Enable Timer 2
+	NVIC_EnableIRQ(TIM2_IRQn);             // Enable Timer 2 interrupt in NVIC
+	TIM2->ARR = delay_value;
+	__enable_irq();
+	TIM2_IRQHandler_chaseled();
+
+}
+```
+This function is responsible for initialising timer 2 and enabling the timer 2 interrupt. The variable `delay_value` defines how long it takes for the timer to elapse and trigger an interrupt event so that the active LED can be shifted to the left. 
+```cpp
+void set_led_state(uint16_t state) {
+	led_state = state;
+	enable_clocks();
+	initialise_board();
+	GPIOE->ODR &= ~(0xFF << 8);       // Clear bits 8–15 (LEDs)
+	GPIOE->ODR |= (state << 8);       // Set new LED state
+
+//	GPIOE->ODR = (GPIOE->ODR & 0x00FF) | (state << 8); // set led state
+}
+```
+This function is responsible for setting a user-defined 8-bit bitmask to the global `led_state` variable by clearing the previous LED state and setting the new one. 
+```cpp
+uint16_t get_led_state(void) {
+    return (GPIOE->ODR >> 8) & 0xFF00;
+}
+```
+This function is responsible for retrieving the current state of the LEDs. 
 ### Testing
-
+For testing and debugging, a few procedures were performed:
+- First, for testing the interrupt, the button was pressed multiple times to observe the pattern that would emerge. The expected behaviour was that the LED would be shifted in a clockwise direction.
+- Second, for the LED display, several different bitmasks were inputted to test whether the pattern would be displayed correctly, such as `0b1111111`.
 ### Notes
-
 
 ## Exercise 2 - Serial Interfaces
 
