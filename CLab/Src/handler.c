@@ -1,9 +1,13 @@
 #include "handler.h"
+
 #include "stm32f303xc.h"
-#include <serial.h>
+
+#include "serial.h"
+#include "timer.h"
+#include "digital_io.h"
+
 #include <string.h>
-#include <timer.h>
-#include <digital_io.h>
+#include <stdio.h>
 
 
 // Global variables (volatile for ISR safety)
@@ -43,6 +47,17 @@ void USART1_EXTI25_IRQHandler(void) {
 
             // Clear new active buffer
             memset((void*)strings[activeIndex], 0, BUFFER);
+        } else if (data == TERMINATING_CHAR) {
+
+        	SerialOutputString((uint8_t *)"\nTERMINATING CHARACTER DETECTED!", &USART1_PORT);
+
+			SerialOutputString((uint8_t*)"\nThe length is: ", &USART1_PORT);
+
+			char strLenBuffer[10];
+			sprintf(strLenBuffer, "%d", writePos);
+
+			SerialOutputString((uint8_t*)strLenBuffer, &USART1_PORT);
+			SerialOutputString((uint8_t*)"\n", &USART1_PORT);
         } else {
             // Store regular character
             strings[activeIndex][writePos++] = data;
@@ -58,21 +73,21 @@ void TIM2_IRQHandler(void) {
     }
 }
 
-// LED interrupt
-//void EXTI0_IRQHandler(void)
-//{
-//	// run the button press handler (make sure it is not null first !)
-//	if (on_button_press != 0x00) {
-//		on_button_press();
-//	}
-//
-//	// reset the interrupt (so it doesn't keep firing until the next trigger)
-//	EXTI->PR |= EXTI_PR_PR0;
-//}
-
 void TIM2_IRQHandler_chaseled() {
     if ((TIM2->SR & TIM_SR_UIF) !=0){
     		chase_led();					// Check if update interrupt
     }
         TIM2->SR &= ~TIM_SR_UIF;            // Clear update interrupt flag
+}
+
+// LED interrupt
+void EXTI0_IRQHandler(void)
+{
+	// run the button press handler (make sure it is not null first !)
+	if (on_button_press != 0x00) {
+		on_button_press();
+	}
+
+	// reset the interrupt (so it doesn't keep firing until the next trigger)
+	EXTI->PR |= EXTI_PR_PR0;
 }

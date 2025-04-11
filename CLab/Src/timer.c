@@ -1,7 +1,7 @@
 #include "timer.h"
 
+#include "gpioe_config.h"
 #include "stm32f303xc.h"
-#include "setup.h"
 #include "handler.h"
 
 #include <stddef.h>

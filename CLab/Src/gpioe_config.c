@@ -1,3 +1,5 @@
+#include "gpioe_config.h"
+
 #include "stm32f303xc.h"
 #include <stddef.h>
 

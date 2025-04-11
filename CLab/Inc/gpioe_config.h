@@ -1,5 +1,5 @@
-#ifndef SETUP_HEADER
-#define SETUP_HEADER
+#ifndef GPIOE_CONFIG_H
+#define GPIOE_CONFIG_H
 
 #include "stm32f303xc.h"
 #include <stddef.h>

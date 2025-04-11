@@ -1,25 +1,20 @@
 #include "digital_io.h"
 
+#include "gpioe_config.h"
 #include "handler.h"
 #include "interrupts.h"
 #include "timer.h"
 
-#include "setup.h"
 #include "stm32f303xc.h"
 
 #include <stdint.h>
 
-#if !defined(__SOFT_FP__) && defined(__ARM_FP)
-  #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
-#endif
-
 void (*on_button_press)() = 0x00; // button press function pointer
-extern uint16_t led_state = 0x00;
+uint16_t led_state = 0x00;  // This is the actual definition and initialization
 
 void button_press(void(*callback)(void)){
 	on_button_press= callback;
 }
-
 
 void chase_led(){
 	uint8_t *led_register = ((uint8_t*)&(GPIOE->ODR)) + 1;
@@ -64,6 +59,6 @@ void set_led_state(uint16_t state) {
 }
 
 // function that gets the led state
-void get_led_state(void) {
-	return (GPIOE->ODR >> 8) & 0xFF00;
+uint16_t get_led_state(void) {
+    return (GPIOE->ODR >> 8) & 0xFF00;
 }

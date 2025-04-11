@@ -1,8 +1,8 @@
 #include <string.h>
 #include <ctype.h>
+#include <gpioe_config.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "setup.h"
 #include "digital_io.h"
 #include "stm32f303xc.h"
 #include "handle_serial_command.h"
