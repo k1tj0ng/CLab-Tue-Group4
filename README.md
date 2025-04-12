@@ -37,15 +37,19 @@ To use this module:
 
 ### Valid input
 Input any integer number as the duration for the delay. 
+
 ### Functions and modularity
-In digital_io.c the functions are: 
+1. "**digital_io.c**"  
+
+i. `button_press(void(*callback)(void))`
 ```cpp
 void button_press(void(*callback)(void)){
 	on_button_press= callback;
 }
 ```
-This function is responsible for taking any user-defined callback function to be called when an interrupt event is triggered, i.e. button press. 
+- This function is responsible for taking any user-defined callback function to be called when an interrupt event is triggered, i.e. button press.  
 
+ii. `chase_led()`
 ```cpp
 void chase_led(){
 	uint8_t *led_register = ((uint8_t*)&(GPIOE->ODR)) + 1;
@@ -56,7 +60,9 @@ void chase_led(){
 	}
 }
 ```
-This function is responsible for shifting the LEDs by one bit to the left. 
+- This function is responsible for shifting the LEDs by one bit to the left.
+
+iii. `enable_prescaler(int delay_value)`
 ```cpp
 void enable_prescaler(int delay_value){
 
@@ -80,7 +86,10 @@ void enable_prescaler(int delay_value){
 
 }
 ```
-This function is responsible for initialising timer 2 and enabling the timer 2 interrupt. The variable `delay_value` defines how long it takes for the timer to elapse and trigger an interrupt event so that the active LED can be shifted to the left. 
+- This function is responsible for initialising timer 2 and enabling the timer 2 interrupt.
+- The variable `delay_value` defines how long it takes for the timer to elapse and trigger an interrupt event so that the active LED can be shifted to the left.
+
+iv. `set_led_state(uint16_t state)`
 ```cpp
 void set_led_state(uint16_t state) {
 	led_state = state;
@@ -92,13 +101,17 @@ void set_led_state(uint16_t state) {
 //	GPIOE->ODR = (GPIOE->ODR & 0x00FF) | (state << 8); // set led state
 }
 ```
-This function is responsible for setting a user-defined 8-bit bitmask to the global `led_state` variable by clearing the previous LED state and setting the new one. 
+- This function is responsible for setting a user-defined 8-bit bitmask to the global `led_state` variable by clearing the previous LED state and setting the new one.
+
+v. `get_led_state(void)`
 ```cpp
 uint16_t get_led_state(void) {
     return (GPIOE->ODR >> 8) & 0xFF00;
 }
 ```
-This function is responsible for retrieving the current state of the LEDs. 
+- This function is responsible for retrieving the current state of the LEDs.
+
+
 ### Testing
 For testing and debugging, a few procedures were performed:
 - First, for testing the interrupt, the button was pressed multiple times to observe the pattern that would emerge. The expected behaviour was that the LED would be shifted in a clockwise direction.
@@ -110,14 +123,14 @@ For testing and debugging, a few procedures were performed:
 ### Summary Overview
 This exercise involves using the UART ports to receive and transmit data. It has a similar concept with the assembly code but using C allows us to use a different approach to check the data registers through the use of interrupts. Unlike polling, which loops to check the register values, these interrupts allows us to sort of multitask by pausing its current work and jumps into a specific function (ISR). We will use this concept to receive and transmit data given to the UART.
 
-### Usage (Instructions)
+### Usage
 The serial module allows you to:  
 1. **Receive data** that is typed by the user from the serial emulator
 2. **Store data** into a variable or buffer
 3. **Transmit data** back to the serial port
 
 ### Functions and modularity
-1. **Initialising GPIO and USART**
+1. **Initialising GPIO and USART** 
 ```cpp
 void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*completion_function)(uint32_t)) {
 	serial_port->completion_function = completion_function;
@@ -306,10 +319,11 @@ void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 ```
 
 ### Testing
-Testing is done through the use of serial terminal emulators such as PuTTY or CuteCom. After setting it up, type in anything to the emulator. When finished, type in the terminating character. We can then check if data is received in the UART by debugging the code and stepping through it line by line. We can also print out statements in the serial port by using our serial output function in certain blocks to check if the flow is running correctly. The example is shown below
-```cpp
-code in here (put the one for error checking like SerialOutputString("message received)
-```
+Testing is done through the use of serial terminal emulators such as PuTTY or CuteCom. After setting it up, type in anything to the emulator. When finished, type in the terminating character. 
+- We can then check if data is received in the UART by debugging the code and stepping through it line by line.
+- We can also print out statements in the serial port by using our serial output function in certain blocks to check if the flow is running correctly.
+- To test the double buffer functionality, we simply just need to check if we can continuously type in the serial ports without needing to hit the reset button.
+
 
 ### Notes
 
@@ -428,15 +442,13 @@ The commands are more or less the same as exercises 1, 2, and 3. Here is a brief
 1. LED 
 - Taking the values from the second part of the string, i.e. 10001010, the function should output LEDs with the given pattern value. 
 
-
 2. Serial
-- From exercise 2, the "serial" comand will transmit the received string back over the serial port.
+- From exercise 2, the "serial" comand will transmit the received string back over the serial port.  
 
+3. Oneshot
+- The timer should run the callback function only once after a set specified delay.  
 
-4. Oneshot
-- The timer should run only once with a delay that is set.
-
-5. Timer
+4. Timer
 - the timer would do a task at every regular interval.
 
 ### Valid input
@@ -581,7 +593,7 @@ void handleSerial(const char* value) {
 #### 2. "**interrupts.c**"
 There are a few interrupts that are used within this integrated program. The following are the functions used to set the conditions of triggering the interrupt, and enabling it:
 i. **`UARTenableInterrupts()`**
-- Taken from exercise 2, this interrupt would be generated when a data is received by the UART
+- Taken from previous exercises, this interrupt would be generated when a data is received by the UART
 ```cpp
 	// Generate an interrupt upon receiving data
 	USART1->CR1 |= USART_CR1_RXNEIE_Msk;
@@ -592,7 +604,7 @@ i. **`UARTenableInterrupts()`**
 ```
 
 ii. **`LEDenableInterrupts()`**
-- Taken from exercise 1, this interrupt would be generated when the user button is pressed (rising edge).
+- Taken from previous exercises, this interrupt would be generated when the user button is pressed (rising edge).
 - This effectively means that when the bit on PA0 goes from 0 to 1, an interrupt is triggered.
 ```cpp
 	// Enable the system configuration controller (SYSCFG in RCC)
@@ -625,8 +637,8 @@ volatile bool bufferReady = false;     // Data ready flag
 ```
 `bufferReady` will then be used later on in the main function as a flag. 
 
-i. **`USART1_EXTI25_IRQHandler()`**
-- Taken from exercise 2, the handler function differs in the data checking part
+i. **`USART1_EXTI25_IRQHandler(void)`**
+- Taken from previous exercises, the handler function differs in the data checking part
 ```cpp
 if (data == '\n' || data == '\r') {
 	// Terminate string and mark buffer ready
@@ -645,13 +657,18 @@ if (data == '\n' || data == '\r') {
 - The code above checks if the received string is `\n` or `\r` as it signals the end of a message.
 - If so, `bufferReady` is set to 1, signaling that it is ready to be processed in the main function.
 
-ii. **`TIM2_IRQHandler()`**
-- Taken from exercise 3, there is no change in the function.
+ii. **`TIM2_IRQHandler(void)`**
+- Taken from previous exercises, there is no change in the function.
+- Called when timer overflows.
 
-iii. **` `**
+iii. **`TIM2_IRQHandler_chaseled()`**
+- Taken from previous exercises, there is no change in the function.
+- Called when the timer has finished counting to a specified value.
 
+iv. **`EXTI0_IRQHandler`**
+- Taken from previous exercises, there is no change in the function
 
-#### 4. "**setup.c**"
+#### 4. "**gpioe_config.c**"
 - This module is used for enabling the clocks.
 - It also initialises the discovery board I/O.
 ```cpp
@@ -669,14 +686,16 @@ void initialise_board() {
 ``` 
 
 #### 5. "**serial.c**"
-- Taken from exercise 3, the contents of this module is not changed.
-
+- Taken from previous exercises, the contents of this module is not changed.
+- To read and transmit data from and into the serial port.
 
 #### 6. "**timer.c**"
-- Taken from exercise 4, the contents of this module is not changed.
+- Taken from previous exercises, the contents of this module is not changed.
+- To enable and configure the timer.
 
 #### 7. "**digital_io.c**"
-- Taken from exercise 1, 
+- Taken from previous exercises, the contents of this module is not changed.
+- To enable and configure the LED and user button.
 
 ### Testing
 
