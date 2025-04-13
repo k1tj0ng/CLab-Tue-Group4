@@ -24,7 +24,7 @@ Using C to interact with the microcontroller. Unlike last project, we aim to tac
 ## Exercise 1 - Digital I/O
 
 ### Summary
-This exercises involves the usage of General-Purpose Input/Output (GPIO) pins to turn off and on LEDs through user-input via a button-press. This is done through using interrupts. All functions for initialisation, controlling LED state and restricting the duration of delay, are contained in digital_io.c, gpioe_config.c, handler.c, interrupts.c, and timer.c, and the functions are declared in their respective header files. All functions are called in the main function to maintain modularity. 
+This exercises involves the usage of General-Purpose Input/Output (GPIO) pins to turn off and on LEDs through user-input via a button-press. This is done through using interrupts. All functions for initialisation, controlling LED state and restricting the duration of delay, are contained in "**digital_io.c**", "**gpioe_config.c**", "**handler.c**", "**interrupts.c**", and "**timer.c**", and the functions are declared in their respective header files. All functions are called in the main function to maintain modularity. 
 
 ### Usage
 To use this module:
