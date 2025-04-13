@@ -21,6 +21,10 @@
 Using C to interact with the microcontroller. Unlike last project, we aim to tackle the problems using interrupts instead of polling. This provides a more efficient way of processing our programs.  
 **Note:** All *header* files have been correctly initialised but not included in the documentation for simplicity.
 
+## Getting start 
+
+
+
 ## Exercise 1 - Digital I/O
 
 ### Summary
@@ -686,5 +690,18 @@ iv. **`EXTI0_IRQHandler`**
 - Taken from previous exercises, the contents of this module is not changed.
 - To enable and configure the LED and user button.
 
-### Testing
+### Instructions for User
+1. __Install Required Software__:
+- Install [CuteCom](https://cutecom.sourceforge.net) and [cMaker](https://cmake.org/download/). Configure CuteCom to connect to the port with a baud rate of 115200, 8 data bits, 1 stop bit, no parity, and no flow control.
+- Install [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html) to transfer code to the STM32 board.
 
+2. __Code Setup__:
+- Clone the repo into STM32CubeIDE.
+- Open CuteCom and enter prompt in the terminal.
+
+### Details About Testing Procedures
+**Troubleshooting**
+1. If no output is visible in the terminal after transmitting the string of characters: check if buffer being initialise properly, confirm CuteCom is configure correctly.
+2. If none of the above work, function logic, base addresses and registers used should be checked.
+
+**General Testing Strategy:** Debugging in the IDE while checking register and memory browser.

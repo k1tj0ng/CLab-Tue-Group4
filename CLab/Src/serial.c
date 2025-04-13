@@ -110,7 +110,6 @@ void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
 }
 
 
-
 void SerialOutputString(uint8_t *pt, SerialPort *serial_port) {
 
 	uint32_t counter = 0;
