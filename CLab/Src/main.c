@@ -44,6 +44,8 @@ int main(void) {
 
 	SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
 	UARTenableInterrupts();
+	enable_clocks();
+	initialise_board();
 
 	for(;;) {
 		if (bufferReady) {
