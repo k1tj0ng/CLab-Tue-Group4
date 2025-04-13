@@ -186,10 +186,10 @@ void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*complet
 	serial_port->UART->CR1 |= USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
 }
 ```
-This is taken from the project **W06-UART-modular-design**.
+- This is taken from the project **W06-UART-modular-design**.
 
 2. **Receive Data**  
-For parts a and b of this exercise, we use a polling approach to receive the data being sent over the serial port.
+- For parts a and b of this exercise, we use a polling approach to receive the data being sent over the serial port.
 ```cpp
 uint8_t SerialInputChar(SerialPort *serial_port) {
     // Wait until data is received
@@ -224,10 +224,11 @@ void SerialInputString(uint8_t *buffer, uint8_t terminator, SerialPort *serial_p
     }
 }
 ```
-This function is not really efficient since it loops to check, if the controller is ready to receive data or not. Hence, in part c, we changed the serial receiving process with an interrupt based approach.
+- This function is not really efficient since it loops to check, if the controller is ready to receive data or not.
+- In part c, we changed the serial receiving process with an interrupt based approach.
 
 3. **Interrupts**  
-Once we got our GPIO pins ready, we then set a specific interrupt function. This basically means telling the controller to generate an interrupt when a specific event that we set occurs. In this case, it is when we receive data in the UART module.
+- Once we got our GPIO pins ready, we then set a specific interrupt function. This basically means telling the controller to generate an interrupt when a specific event that we set occurs. In this case, it is when we receive data in the UART module.
 ```cpp
 void enableInterrupts() {
 	// Interrupts disabled so that process is not intervened
@@ -244,7 +245,7 @@ void enableInterrupts() {
 	__enable_irq();
 }
 ```
-Now, whenever the receiving bit of the UART sends a flag saying that it has received data, the interrupt is generated and the controller will automatically jump to the interrupt handler function shown below.
+- Now, whenever the receiving bit of the UART sends a flag saying that it has received data, the interrupt is generated and the controller will automatically jump to the interrupt handler function shown below.
 ```cpp
 void USART1_EXTI25_IRQHandler(void) {
     // Check for errors first (clears them automatically on read)
@@ -287,13 +288,13 @@ void USART1_EXTI25_IRQHandler(void) {
     }
 }
 ```
-This function, called the Interrupt Service Routine (ISR), essentialy handles the event. When it is called, the received data will then be stored in a buffer storage. Afterwards, it transmits the data back to the user.  
+- This function, called the Interrupt Service Routine (ISR), essentialy handles the event. When it is called, the received data will then be stored in a buffer storage. Afterwards, it transmits the data back to the user.  
 
-Advanced Functionality:
+**Advanced Functionality**:
 - Double buffer used which allows the program to take in another string without intervening the interrupt process
 
 4. **Outputs**  
-To output the function, we used a function called SerialOutputString and SerialOutputChar (from the lecture) that takes in the list of characters (array) as parameters and outputs the list to PuTTy or other terminal software.
+  - To output the function, we used a function called SerialOutputString and SerialOutputChar (from the lecture) that takes in the list of characters (array) as parameters and outputs the list to PuTTy or other terminal software.
 ```cpp
 void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
 
