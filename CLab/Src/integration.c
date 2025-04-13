@@ -81,12 +81,25 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
         set_led_state((uint16_t)value);
     }
     else if(strcasecmp(command, "timer") == 0) {
+    	static bool timerRunning = false;
         handleNumericCommand("TIMER", value);
-    	timerdemo(value);
+        uint32_t interval = strtol(value, NULL, 10);
+
+        if (!timerRunning) {
+            timer_init(interval, blink_leds);
+            timerRunning = true;
+        } else {
+            timer_reset(interval);
+        }
     }
+    //else if(strcasecmp(command, "timer") == 0) {
+    //	handleNumericCommand("TIMER", value);
+    //	timerdemo(value);
+    //}
     else if(strcasecmp(command, "oneshot") == 0) {
     	handleNumericCommand("ONESHOT", value);
-    	timer_one_shot(value, timerCallback);
+    	timer_one_shot(strtol(value, NULL, 10), blink_leds);
+    //	timer_one_shot(value, timerCallback);
     }
     else if(strcasecmp(command, "serial") == 0) {
         handleSerial(value);
