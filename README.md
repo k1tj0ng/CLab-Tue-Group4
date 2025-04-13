@@ -24,7 +24,8 @@ Using C to interact with the microcontroller. Unlike last project, we aim to tac
 ## Exercise 1 - Digital I/O
 
 ### Summary
-This exercises involves the usage of General-Purpose Input/Output (GPIO) pins to turn off and on LEDs through user-input via a button-press. This is done through using interrupts. All functions for initialisation, controlling LED state and restricting the duration of delay, are contained in "**digital_io.c**", "**gpioe_config.c**", "**handler.c**", "**interrupts.c**", and "**timer.c**", and the functions are declared in their respective header files. All functions are called in the main function to maintain modularity. 
+This exercises involves the usage of General-Purpose Input/Output (GPIO) pins to turn off and on LEDs through user-input via a button-press. This is done through using interrupts. All functions for initialisation, controlling LED state and restricting the duration of delay, are contained in "**digital_io.c**", "**gpioe_config.c**", "**handler.c**", "**interrupts.c**", and "**timer.c**", and the functions are declared in their respective header files. All functions are called in the main function to maintain modularity.  
+This exercise is based of the project **W05-C-interrupt**.
 
 ### Usage
 To use this module:
@@ -121,7 +122,8 @@ For testing and debugging, a few procedures were performed:
 ## Exercise 2 - Serial Interfaces
 
 ### Summary Overview
-This exercise involves using the UART ports to receive and transmit data. It has a similar concept with the assembly code but using C allows us to use a different approach to check the data registers through the use of interrupts. Unlike polling, which loops to check the register values, these interrupts allows us to sort of multitask by pausing its current work and jumps into a specific function (ISR). We will use this concept to receive and transmit data given to the UART.
+This exercise involves using the UART ports to receive and transmit data. It has a similar concept with the assembly code but using C allows us to use a different approach to check the data registers through the use of interrupts. Unlike polling, which loops to check the register values, these interrupts allows us to sort of multitask by pausing its current work and jumps into a specific function (ISR). We will use this concept to receive and transmit data given to the UART.  
+This exercise is based of the project **W06-UART-modular-design**.
 
 ### Usage
 The serial module allows you to:  
@@ -186,7 +188,6 @@ void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*complet
 	serial_port->UART->CR1 |= USART_CR1_TE | USART_CR1_RE | USART_CR1_UE;
 }
 ```
-- This is taken from the project **W06-UART-modular-design**.
 
 2. **Receive Data**  
 - For parts a and b of this exercise, we use a polling approach to receive the data being sent over the serial port.
@@ -293,8 +294,8 @@ void USART1_EXTI25_IRQHandler(void) {
 **Advanced Functionality**:
 - Double buffer used which allows the program to take in another string without intervening the interrupt process
 
-4. **Outputs**  
-  - To output the function, we used a function called SerialOutputString and SerialOutputChar (from the lecture) that takes in the list of characters (array) as parameters and outputs the list to PuTTy or other terminal software.
+4. **Outputs**
+- To output the function, we used a function called SerialOutputString and SerialOutputChar (from the lecture) that takes in the list of characters (array) as parameters and outputs the list to PuTTy or other terminal software.
 ```cpp
 void SerialOutputChar(uint8_t data, SerialPort *serial_port) {
 
@@ -331,7 +332,8 @@ Testing is done through the use of serial terminal emulators such as PuTTY or Cu
 ## Exercise 3 - Timer Interfaces
 
 ### Summary
-This section is the system's timer software module. The timer should trigger a callback function at regular intervals, allow resetting the interval, and trigger a one-shot event. The module is designed using a general-purpose timer (TIM2).
+This section is the system's timer software module. The timer should trigger a callback function at regular intervals, allow resetting the interval, and trigger a one-shot event. The module is designed using a general-purpose timer (TIM2).  
+This exercise is based of the project **W06-C-timers**.
 
 ### Usage
 The timer module allows you to:
@@ -667,24 +669,10 @@ iii. **`TIM2_IRQHandler_chaseled()`**
 - Called when the timer has finished counting to a specified value.
 
 iv. **`EXTI0_IRQHandler`**
-- Taken from previous exercises, there is no change in the function
+- Taken from previous exercises, there is no change in the function.
 
 #### 4. "**gpioe_config.c**"
-- This module is used for enabling the clocks.
-- It also initialises the discovery board I/O.
-```cpp
-// Enable the clocks for GPIOE and TIM2
-void enable_clocks() {
-    RCC->AHBENR |= RCC_AHBENR_GPIOEEN;  // Enable the GPIOE clock
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // Enable the TIM2 clock
-}
-
-// Initialise the discovery board I/O
-void initialise_board() {
-    uint16_t *led_output_registers = ((uint16_t *)&(GPIOE->MODER)) + 1;
-    *led_output_registers = 0x5555;  // Set PE8-PE15 as output
-}
-``` 
+- Taken from previous exercises, there is no change in the function.
 
 #### 5. "**serial.c**"
 - Taken from previous exercises, the contents of this module is not changed.
