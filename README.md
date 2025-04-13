@@ -18,7 +18,7 @@
 
 
 ## 🔍 Project Overview
-Using C to interact with the microcontroller. Unlike last project, we aim to tackle the problems using interrupts instead of polling. This provides a more efficient way of processing our programs.
+Using C to interact with the microcontroller. Unlike last project, we aim to tackle the problems using interrupts instead of polling. This provides a more efficient way of processing our programs.  
 **Note:** All *header* files have been correctly initialised but not included in the documentation for simplicity.
 
 ## Exercise 1 - Digital I/O
