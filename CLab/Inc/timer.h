@@ -2,10 +2,12 @@
 #define TIMER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // Define the callback function using the function pointers
 typedef void (*CallbackFunction)(void);
 extern CallbackFunction timerCallback;
+extern volatile bool isOneShot;
 
 // Timer interrupt handler
 void TIM2_IRQHandler(void);
@@ -22,6 +24,7 @@ void timer_one_shot(uint32_t delay, CallbackFunction callback);
 // Function to swap the state of the LEDs
 void blink_leds(void);
 
+// Function for assessment day
 int timerdemo(int interval);
 
 #endif
