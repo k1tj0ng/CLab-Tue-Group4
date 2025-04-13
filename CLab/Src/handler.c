@@ -66,20 +66,15 @@ void USART1_EXTI25_IRQHandler(void) {
 }
 
 // Timer interrupt handler for TIM2
-volatile bool isOneShot = false;
 void TIM2_IRQHandler(void) {
-	if (TIM2->SR & TIM_SR_UIF) {  // Check if the interrupt flag is raised
-		TIM2->SR &= ~TIM_SR_UIF;  // Clear the interrupt flag
+	if (TIM2->SR & TIM_SR_UIF) {	// Check if the interrupt flag is raised
+		TIM2->SR &= ~TIM_SR_UIF;	// Clear the interrupt flag
+		timerCallback();			// Execute the callback function
 
-		// Execute the callback function
-		timerCallback();
-
-		// Check if one-shot
+		// Check if one-shot mode
 		if (isOneShot) {
-			// Disable the timer after the callback
-			TIM2->CR1 &= ~TIM_CR1_CEN;
-			isOneShot = false;
-			NVIC_DisableIRQ(TIM2_IRQn); //Disable the interrupt
+			TIM2->CR1 &= ~TIM_CR1_CEN;	// Stop the timer after the callback
+			isOneShot = false;			// Clear the one-shot flag
 		}
 	}
 }
