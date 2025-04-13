@@ -337,7 +337,7 @@ Testing is done through the use of serial terminal emulators such as PuTTY or Cu
 
 ### Summary
 This section is the system's timer software module. The timer should trigger a callback function at regular intervals, allow resetting the interval, and trigger a one-shot event. The module is designed using a general-purpose timer (TIM2).  
-This exercise is based of the project **W06-C-timers**.
+This exercise is based on the project **W06-C-timers**.
 
 ### Usage
 The timer module allows you to:
@@ -346,8 +346,8 @@ The timer module allows you to:
 3. **Trigger a one-shot event**, where the timer triggers a callback once and then stops.
 
 ### Valid input
-1. **Interval for Periodic Timer**
-   The `interval` parameter passed to the `timer_init` function specifies the time period in milliseconds at which the callback will be executed. Valid inputs are positive integer values that represent the time in milliseconds.
+1. **Interval and new_interval for Periodic Timer**
+   The `interval` and `new_interval` parameters passed to the `timer_init` or `timer_reset` function specify the time period in milliseconds at which the callback will be executed. Valid inputs are positive integer values that represent the time in milliseconds.
 2. **Delay for One-Shot Timer**
    The `delay` parameter passed to the `timer_one_shot` function specifies the time in milliseconds before triggering the callback once. It should also be a positive integer.
 
@@ -358,19 +358,20 @@ The timer module allows you to:
    - The callback function is stored for later execution when the timer overflows.
 ```cpp
 void timer_init(uint32_t interval, CallbackFunction callback) {
-	// Set up the timer prescaler
-	TIM2->PSC = 7999;  // (8MHz:1000)-1
-	TIM2->ARR = interval;
+	TIM2->CR1 &= ~TIM_CR1_CEN;	// Stop the timer
+	isOneShot = false;		// Flag for periodic timer mode
 
-	// Enable interrupt when there is overflow
-	TIM2->DIER |= TIM_DIER_UIE;
-	NVIC_EnableIRQ(TIM2_IRQn);
+	// Set up the timer prescaler, for 1khZ frequency = (8MHz:1000)-1
+	TIM2->PSC = 7999;
+	TIM2->ARR = interval;		// Set the time interval
+	TIM2->CNT = 0;			// Reset the counter
+
+	TIM2->DIER |= TIM_DIER_UIE;	// Enable interrupt when there is overflow
+	NVIC_EnableIRQ(TIM2_IRQn);	// Enable interrupt in the NVIC
 	
-	// Set the callback function
-	timerCallback = callback;
+	timerCallback = callback;	// Set the callback function
 	
-	// Start the timer
-	TIM2->CR1 |= TIM_CR1_CEN;
+	TIM2->CR1 |= TIM_CR1_CEN;	// Start the timer
 }
 ```
 
@@ -378,12 +379,12 @@ void timer_init(uint32_t interval, CallbackFunction callback) {
     - This function resets the timer with a new interval.
     - It resets the counter, updates the ARR register, and re-starts the timer.
 ```cpp
-void timer_reset(uint32_t interval) {
-    TIM2->CR1 &= ~TIM_CR1_CEN;       // Stop timer
-    TIM2->CNT = 0;                   // Reset counter
-    TIM2->ARR = interval;            // Update ARR
-    TIM2->EGR |= TIM_EGR_UG;         // Force update event to load ARR
-    TIM2->CR1 |= TIM_CR1_CEN;        // Restart timer
+void timer_reset(uint32_t new_interval) {
+	TIM2->CR1 &= ~TIM_CR1_CEN;	// Stop timer
+	TIM2->CNT = 0;			// Reset counter
+	TIM2->ARR = new_interval;	// Update ARR
+	TIM2->EGR |= TIM_EGR_UG;	// Force update event to load ARR
+	TIM2->CR1 |= TIM_CR1_CEN;	// Restart timer
 }
 ```
 
@@ -392,16 +393,21 @@ void timer_reset(uint32_t interval) {
     - It uses a flag (`isOneShot`) to indicate that the timer should stop after one callback.
 ```cpp
 void timer_one_shot(uint32_t delay, CallbackFunction callback) {
-	// Set the delay and callback function
+	TIM2->CR1 &= ~TIM_CR1_CEN;	// Stop timer
+	isOneShot = true;		// Flag for oneshot timer mode
+
+	// Set up the timer prescaler
+	TIM2->PSC = 7999;
+	TIM2->ARR = delay;
+	TIM2->CNT = 0;
+
+	// Enable interrupt
+	TIM2->DIER |= TIM_DIER_UIE;
+	NVIC_EnableIRQ(TIM2_IRQn);
+
 	timerCallback = callback;
-//	isOneShot = true;
-	
-	TIM2->CNT = 0;      // Reset the timer counter
-	TIM2->ARR = delay;  // Reload the ARR register with the new interval
-	TIM2->CR1 |= TIM_CR1_CEN;
-	
-	// Re-initialize the timer
-	timer_init(delay, timerCallback);
+
+	TIM2->CR1 |= TIM_CR1_CEN;	// Start timer
 }
 ```
       
@@ -411,10 +417,16 @@ void timer_one_shot(uint32_t delay, CallbackFunction callback) {
     - If the one-shot mode is active, it disables the timer after executing the callback to stop it from continuing.
 ```cpp
 void TIM2_IRQHandler(void) {
-    if (TIM2->SR & TIM_SR_UIF) {  // Check if the interrupt flag is raised
-        TIM2->SR &= ~TIM_SR_UIF;  // Clear the interrupt flag
-        timerCallback();  // Execute the callback function
-    }
+	if (TIM2->SR & TIM_SR_UIF) {		// Check if the interrupt flag is raised
+		TIM2->SR &= ~TIM_SR_UIF;	// Clear the interrupt flag
+		timerCallback();		// Execute the callback function
+
+		// Check if one-shot mode
+		if (isOneShot) {
+			TIM2->CR1 &= ~TIM_CR1_CEN;	// Stop the timer after the callback
+			isOneShot = false;		// Clear the one-shot flag
+		}
+	}
 }
 ```
 
