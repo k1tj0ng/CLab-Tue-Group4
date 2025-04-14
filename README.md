@@ -120,7 +120,7 @@ uint16_t get_led_state(void) {
 i. `LEDenableInterrupts()`
 - The function to set/enable the interrupt.
 - The code below sets the condition that if the button is pressed, an interrupt is triggered as it is set on rising edge mode.
-```
+```cpp
 void LEDenableInterrupts() {
 	// Disable the interrupts while messing around with the settings
 	//  otherwise can lead to strange behaviour
@@ -151,7 +151,7 @@ void LEDenableInterrupts() {
 ii. `EXTI0_IRQHandler(void)`
 - Interrupt handler function.
 - This function is called when the interrupt is triggered.
-```
+```cpp
 void EXTI0_IRQHandler(void)
 {
 	// run the button press handler (make sure it is not null first !)
