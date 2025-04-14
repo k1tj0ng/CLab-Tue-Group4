@@ -126,7 +126,7 @@ For testing and debugging, a few procedures were performed:
 ## Exercise 2 - Serial Interfaces
 
 ### Summary Overview
-This exercise involves using the UART ports to receive and transmit data. It has a similar concept with the assembly code but using C allows us to use a different approach to check the data registers through the use of interrupts. Unlike polling, which loops to check the register values, these interrupts allows us to sort of multitask by pausing its current work and jumps into a specific function (ISR). We will use this concept to receive and transmit data given to the UART.  
+This exercise involves using the UART ports to receive and transmit data. It has a similar concept with the assembly code but using C allows us to use a different approach to check the data registers through the use of interrupts. We will use this concept to receive and transmit data given to the UART.  
 This exercise is based of the project **W06-UART-modular-design**.
 
 ### Usage
@@ -477,7 +477,11 @@ The commands are more or less the same as exercises 1, 2, and 3. Here is a brief
 
 ### Functions and modularity
 #### 1. "**integration.c**"
-This module is designed to handle the main process of the program with the use of several functions. It branches to other function depending on the string entered by the user in the serial port. Some modules are directly taken from previous exercise, resulting in no change within the module. 
+This module is designed to handle the main process of the program with the use of several functions. It branches to other function depending on the string entered by the user in the serial port. Some modules are directly taken from previous exercise, resulting in no change within the module.  
+We added a global variable:  
+```cpp
+int INTERVAL_BUFFER = 10;
+```
 
 i. **`sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex)`**
 - This function's task is to read the user's input and decide which function is to be called next
@@ -525,14 +529,19 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
     // Command processing
     if(strcasecmp(command, "led") == 0) {
         handleNumericCommand("LED", value);
+        uint8_t bitmask = strtol(value, NULL, 2);
+        set_led_state(bitmask);
     }
     else if(strcasecmp(command, "timer") == 0) {
-        handleNumericCommand("TIMER", value);
-    	timerdemo(value);
+    	handleNumericCommand("TIMER", value);
+    	uint32_t interval = strtol(value, NULL, INTERVAL_BUFFER);
+    	timerhandle(interval);
     }
     else if(strcasecmp(command, "oneshot") == 0) {
     	handleNumericCommand("ONESHOT", value);
-    	timer_one_shot(value, timerCallback);
+    	uint32_t delay = strtol(value, NULL, INTERVAL_BUFFER);
+    	timer_one_shot(delay, blink_leds);
+    //	timer_one_shot(value, timerCallback);
     }
     else if(strcasecmp(command, "serial") == 0) {
         handleSerial(value);
@@ -544,7 +553,6 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
     }
     SerialOutputString((uint8_t*)"\n", &USART1_PORT);
     memset(buffers[bufIndex], 0, BUFFER);
-}
 ```
 - Using if-else statements, we then compare `command` with several different keywords that refers to the function it should call afterwards.
 - Once it matches one of the keywords, it calls the designated function, taking `value` as a parameter.
@@ -610,54 +618,21 @@ void handleSerial(const char* value) {
 
 
 #### 2. "**interrupts.c**"
-There are a few interrupts that are used within this integrated program. The following are the functions used to set the conditions of triggering the interrupt, and enabling it:
-i. **`UARTenableInterrupts()`**
-- Taken from previous exercises, this interrupt would be generated when a data is received by the UART
-```cpp
-	// Generate an interrupt upon receiving data
-	USART1->CR1 |= USART_CR1_RXNEIE_Msk;
-
-	// Set priority and enable interrupts
-	NVIC_SetPriority(USART1_IRQn, 1);
-	NVIC_EnableIRQ(USART1_IRQn);
-```
-
-ii. **`LEDenableInterrupts()`**
-- Taken from previous exercises, this interrupt would be generated when the user button is pressed (rising edge).
-- This effectively means that when the bit on PA0 goes from 0 to 1, an interrupt is triggered.
-```cpp
-	// Enable the system configuration controller (SYSCFG in RCC)
-	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
-
-	// External Interrupts details on large manual page 294)
-	// PA0 is on interrupt EXTI0 large manual - page 250
-	// EXTI0 in  SYSCFG_EXTICR1 needs to be 0x00 (SYSCFG_EXTICR1_EXTI0_PA)
-	SYSCFG->EXTICR[0] = SYSCFG_EXTICR1_EXTI0_PA;
-
-	//  Select EXTI0 interrupt on rising edge
-	EXTI->RTSR |= EXTI_RTSR_TR0; // rising edge of EXTI line 0 (includes PA0)
-
-	// set the interrupt from EXTI line 0 as 'not masked' - as in, enable it.
-	EXTI->IMR |= EXTI_IMR_MR0;
-
-	// Tell the NVIC module that EXTI0 interrupts should be handled
-	NVIC_SetPriority(EXTI0_IRQn, 1);  // Set Priority
-	NVIC_EnableIRQ(EXTI0_IRQn);
-
-```
-
-
+This module contains functions that are used to enable the interrupts which are taken from the previous exercise. There is no change to the content of the functions.  
+i. `UARTenableInterrupts()`  
+ii. `LEDenableInterrupts()`
 
 #### 3. "**handler.c**"
 For this specific integrated program, we introduce new global variables:
 ```cpp
 volatile uint16_t writePos = 0;       // Current write position
 volatile bool bufferReady = false;     // Data ready flag
+volatile bool termminatingCharDetected = false; 
 ```
 `bufferReady` will then be used later on in the main function as a flag. 
 
 i. **`USART1_EXTI25_IRQHandler(void)`**
-- Taken from previous exercises, the handler function differs in the data checking part
+- Taken from previous exercises, the handler function differs in the data checking part.
 ```cpp
 if (data == '\n' || data == '\r') {
 	// Terminate string and mark buffer ready
@@ -675,32 +650,46 @@ if (data == '\n' || data == '\r') {
 ```
 - The code above checks if the received string is `\n` or `\r` as it signals the end of a message.
 - If so, `bufferReady` is set to 1, signaling that it is ready to be processed in the main function.
+- We also added in the terminatingCharDetected variable which is used in the function.
+```cpp
+else if (data == TERMINATING_CHAR) {
+	terminatingCharDetected = 1;
+	SerialOutputString((uint8_t *)"\nTERMINATING CHARACTER DETECTED!", &USART1_PORT);
+```
 
-ii. **`TIM2_IRQHandler(void)`**
+#### 4. "**timer.c**"
+- We added in a new function to make the timer work in the integration.  
+i. `timerhandle(int interval)`
+```cpp
+void timerhandle(int interval) {
+    static bool timerRunning = false;
+
+    if (!timerRunning) {
+        timer_init(interval, blink_leds);
+        timerRunning = true;
+    } else {
+        timer_reset(interval);
+    }
+}
+```
+
+
+#### 5. "**digital_io.c**"
+- We made some minor change in our set led function which involves clearing the timer flag so that the timer will not intervene the LED process.  
+i. `set_led_state(uint8_t state)`
+```cpp
+void set_led_state(uint8_t state) {
+	TIM2->CR1 &= ~TIM_CR1_CEN;		// Clear timer flag
+	GPIOE->ODR &= ~(0xFF << 8);       // Clear bits 8–15 (LEDs)
+	GPIOE->ODR |= (state << 8);       // Set new LED state
+}
+```
+
+#### 6. "**gpioe_config.c**"
 - Taken from previous exercises, there is no change in the function.
-- Called when timer overflows.
 
-iii. **`TIM2_IRQHandler_chaseled()`**
-- Taken from previous exercises, there is no change in the function.
-- Called when the timer has finished counting to a specified value.
-
-iv. **`EXTI0_IRQHandler`**
-- Taken from previous exercises, there is no change in the function.
-
-#### 4. "**gpioe_config.c**"
-- Taken from previous exercises, there is no change in the function.
-
-#### 5. "**serial.c**"
+#### 7. "**serial.c**"
 - Taken from previous exercises, the contents of this module is not changed.
-- To read and transmit data from and into the serial port.
-
-#### 6. "**timer.c**"
-- Taken from previous exercises, the contents of this module is not changed.
-- To enable and configure the timer.
-
-#### 7. "**digital_io.c**"
-- Taken from previous exercises, the contents of this module is not changed.
-- To enable and configure the LED and user button.
 
 ## Instructions for User
 1. __Install Required Software__:
