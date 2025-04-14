@@ -12,6 +12,7 @@
 // Global variables (volatile for ISR safety)
 volatile uint16_t writePos = 0;       // Current write position
 volatile bool bufferReady = false;     // Data ready flag
+volatile bool terminatingCharDetected = false;
 
 void USART1_EXTI25_IRQHandler(void) {
     // Check for errors first (clears them automatically on read)
@@ -48,6 +49,8 @@ void USART1_EXTI25_IRQHandler(void) {
             memset((void*)strings[activeIndex], 0, BUFFER);
         } else if (data == TERMINATING_CHAR) {
 
+        	terminatingCharDetected = 1;
+
         	SerialOutputString((uint8_t *)"\nTERMINATING CHARACTER DETECTED!", &USART1_PORT);
 
 			SerialOutputString((uint8_t*)"\nThe length is: ", &USART1_PORT);
@@ -57,6 +60,13 @@ void USART1_EXTI25_IRQHandler(void) {
 
 			SerialOutputString((uint8_t*)strLenBuffer, &USART1_PORT);
 			SerialOutputString((uint8_t*)"\n", &USART1_PORT);
+
+			readyIndex = activeIndex;
+			activeIndex ^= 1;
+			writePos = 0;
+
+			// Clear new active buffer
+			memset((void*)strings[activeIndex], 0, BUFFER);
         } else {
             // Store regular character
             strings[activeIndex][writePos++] = data;

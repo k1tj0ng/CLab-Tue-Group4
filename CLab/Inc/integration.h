@@ -3,6 +3,8 @@
 
 #include "serial.h"
 
+extern int INTERVAL_BUFFER;
+
 void handleNumericCommand(const char* name, const char* value);
 
 void handleSerial(const char* value);

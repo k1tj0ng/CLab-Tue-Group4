@@ -4,12 +4,15 @@
 #include "serial.h"
 #include "timer.h"
 #include "digital_io.h"
+#include "handler.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <ctype.h>
+
+int INTERVAL_BUFFER = 10;
 
 // Numerical command handler
 void handleNumericCommand(const char* name, const char* value) {
@@ -22,7 +25,7 @@ void handleNumericCommand(const char* name, const char* value) {
     }
 
     char* endptr;
-    long num = strtol(value, &endptr, 10);
+    long num = strtol(value, &endptr, INTERVAL_BUFFER);
     int digits = snprintf(NULL, 0, "%ld", num);
 
     // If value is invalid, display error message otherwise continue.
@@ -77,6 +80,10 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
         while(isspace(*value)) value++;
     }
 
+    if (terminatingCharDetected) {
+        	return;
+        }
+
     // Debug print
 	SerialOutputString((uint8_t*)"\nProcessing: [", &USART1_PORT);
 	SerialOutputString((uint8_t*)cmdStart, &USART1_PORT);
@@ -85,18 +92,17 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
     // Command processing
     if(strcasecmp(command, "led") == 0) {
         handleNumericCommand("LED", value);
-        TIM2->CR1 &= ~TIM_CR1_CEN;	// Clear timer flag
         uint8_t bitmask = strtol(value, NULL, 2);
         set_led_state(bitmask);
     }
     else if(strcasecmp(command, "timer") == 0) {
     	handleNumericCommand("TIMER", value);
-    	uint32_t interval = strtol(value, NULL, 10);
+    	uint32_t interval = strtol(value, NULL, INTERVAL_BUFFER);
     	timerhandle(interval);
     }
     else if(strcasecmp(command, "oneshot") == 0) {
     	handleNumericCommand("ONESHOT", value);
-    	uint32_t delay = strtol(value, NULL, 10);
+    	uint32_t delay = strtol(value, NULL, INTERVAL_BUFFER);
     	timer_one_shot(delay, blink_leds);
     //	timer_one_shot(value, timerCallback);
     }

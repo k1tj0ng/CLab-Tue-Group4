@@ -27,6 +27,7 @@ void blink_leds(void);
 // Function for assessment day
 int timerdemo(int interval);
 
-void timerhandle(int value);
+// Timer integration
+void timerhandle(int interval);
 
 #endif

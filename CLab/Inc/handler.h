@@ -14,5 +14,6 @@ void TIM2_IRQHandler_chaseled();
 
 extern volatile uint16_t writePos;     // Current write position
 extern volatile bool bufferReady;
+extern volatile bool terminatingCharDetected;
 
 #endif

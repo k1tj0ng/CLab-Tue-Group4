@@ -89,6 +89,7 @@ void enable_prescaler(int delay_value){
 
 // function that sets the led state
 void set_led_state(uint8_t state) {
+	TIM2->CR1 &= ~TIM_CR1_CEN;		// Clear timer flag
 	GPIOE->ODR &= ~(0xFF << 8);       // Clear bits 8–15 (LEDs)
 	GPIOE->ODR |= (state << 8);       // Set new LED state
 }
