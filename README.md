@@ -9,12 +9,11 @@
 ## Justin, Kit, Ribka, Sulfat
 
 ## 👥 Roles and Responbilities
-- **Justin:** Exercise 2: Serial Interfaces
-- **Kit:** Exercise 2: Serial Interfaces
-- **Ribka:** Exercise 3: Timer Interface
-- **Sulfat:** Exercise 1: Digital I/O
+- **Justin:** Majority of work on README, contributed to Exercise 2: Serial Interfaces
+- **Kit:** Majority of implementation for Exercise 4: Integration, also worked on Exercise 2: Serial Interfaces
+- **Ribka:** Main contributor to Exercise 3: Timer Interface
+- **Sulfat:** Main contributor to Exercise 1: Digital I/O
 - **Everyone contributed to Exercise 4: Integration.** 
-
 
 
 ## 🔍 Project Overview
