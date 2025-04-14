@@ -18,9 +18,11 @@
 
 ## 🔍 Project Overview
 Using C to interact with the microcontroller. Unlike last project, we aim to tackle the problems using interrupts instead of polling. This provides a more efficient way of processing our programs.  
+
+
 **Note:** All *header* files have been correctly initialised but not included in the documentation for simplicity.
 
-## Getting Started
+# Getting Started
 
 
 ## Exercise 1 - Digital I/O
@@ -32,7 +34,7 @@ This exercise is based of the project **W05-C-interrupt**.
 ### Usage
 To use this module:
 1. Initialise interrupts, clocks and, GPIOs for LEDs output and button input. 
-2. Call `button_press` and `enable_interrupt` function to run when button is pressed where it generates an interrupt event.
+2. Call `button_press` and `LEDenableInterrupts` function to run when button is pressed where it generates an interrupt event.
 3. LED will light up when the button is pressed.
 4. Set integer number for delay.
 5. Call `enable_prescalar` function to enable timer 2 interrupt.
@@ -114,6 +116,54 @@ uint16_t get_led_state(void) {
 ```
 - This function is responsible for retrieving the current state of the LEDs.
 
+2. **Interrupts**
+i. `LEDenableInterrupts()`
+- The function to set/enable the interrupt.
+- The code below sets the condition that if the button is pressed, an interrupt is triggered as it is set on rising edge mode.
+```
+void LEDenableInterrupts() {
+	// Disable the interrupts while messing around with the settings
+	//  otherwise can lead to strange behaviour
+	__disable_irq();
+
+	// Enable the system configuration controller (SYSCFG in RCC)
+	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+
+	// External Interrupts details on large manual page 294)
+	// PA0 is on interrupt EXTI0 large manual - page 250
+	// EXTI0 in  SYSCFG_EXTICR1 needs to be 0x00 (SYSCFG_EXTICR1_EXTI0_PA)
+	SYSCFG->EXTICR[0] = SYSCFG_EXTICR1_EXTI0_PA;
+
+	//  Select EXTI0 interrupt on rising edge
+	EXTI->RTSR |= EXTI_RTSR_TR0; // rising edge of EXTI line 0 (includes PA0)
+
+	// set the interrupt from EXTI line 0 as 'not masked' - as in, enable it.
+	EXTI->IMR |= EXTI_IMR_MR0;
+
+	// Tell the NVIC module that EXTI0 interrupts should be handled
+	NVIC_SetPriority(EXTI0_IRQn, 1);  // Set Priority
+	NVIC_EnableIRQ(EXTI0_IRQn);
+
+	// Re-enable all interrupts (now that we are finished)
+	__enable_irq();
+}
+```
+ii. `EXTI0_IRQHandler(void)`
+- Interrupt handler function.
+- This function is called when the interrupt is triggered.
+```
+void EXTI0_IRQHandler(void)
+{
+	// run the button press handler (make sure it is not null first !)
+	if (on_button_press != 0x00) {
+		on_button_press();
+	}
+
+	// reset the interrupt (so it doesn't keep firing until the next trigger)
+	EXTI->PR |= EXTI_PR_PR0;
+}
+```
+- It essentially just calls the callback function and clear the interrupt flag.
 
 ### Testing
 For testing and debugging, a few procedures were performed:
@@ -630,7 +680,7 @@ volatile bool termminatingCharDetected = false;
 `bufferReady` will then be used later on in the main function as a flag. 
 
 i. **`USART1_EXTI25_IRQHandler(void)`**
-- Taken from previous exercises, the handler function differs in the data checking part.
+- Taken from previous exercises, the handler function only differs in the data checking part.
 ```cpp
 if (data == '\n' || data == '\r') {
 	// Terminate string and mark buffer ready
@@ -671,13 +721,12 @@ void timerhandle(int interval) {
 }
 ```
 
-
 #### 5. "**digital_io.c**"
 - We made some minor change in our set led function which involves clearing the timer flag so that the timer will not intervene the LED process.  
 i. `set_led_state(uint8_t state)`
 ```cpp
 void set_led_state(uint8_t state) {
-	TIM2->CR1 &= ~TIM_CR1_CEN;		// Clear timer flag
+	TIM2->CR1 &= ~TIM_CR1_CEN;	  // Clear timer flag
 	GPIOE->ODR &= ~(0xFF << 8);       // Clear bits 8–15 (LEDs)
 	GPIOE->ODR |= (state << 8);       // Set new LED state
 }
