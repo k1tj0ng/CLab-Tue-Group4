@@ -697,7 +697,9 @@ void set_led_state(uint8_t state) {
 - Install [STM32CubeIDE](https://www.st.com/en/development-tools/stm32cubeide.html) to transfer code to the STM32 board.
 
 2. __Code Setup__:
-- Clone the repo into STM32CubeIDE.
+- Clone the repo.
+- Import Clab folder into STM32IDE workspace.
+- Run Clab debug.
 - Open CuteCom and enter prompt in the terminal.
 
 ## Details About Testing Procedures
