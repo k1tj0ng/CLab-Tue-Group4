@@ -520,8 +520,8 @@ The commands are more or less the same as exercises 1, 2, and 3. Here is a brief
 
 ### Valid input
 - The input by the user should have 2 parts.
-- The first part must be in lower case.
-- The second part must correspond to the parameters of the function to be called.
+- The first part should be a function name listed in the usage above.
+- The second part should correspond to the parameters of the function to be called.
 
 ### Functions and modularity
 #### 1. "**integration.c**"
