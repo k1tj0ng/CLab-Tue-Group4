@@ -85,9 +85,9 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
     // Command processing
     if(strcasecmp(command, "led") == 0) {
         handleNumericCommand("LED", value);
+        TIM2->CR1 &= ~TIM_CR1_CEN;	// Clear timer flag
         uint8_t bitmask = strtol(value, NULL, 2);
         set_led_state(bitmask);
-        //set_led_state((uint16_t)value);
     }
     else if(strcasecmp(command, "timer") == 0) {
     	static bool timerRunning = false;
