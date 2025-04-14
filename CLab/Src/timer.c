@@ -86,3 +86,14 @@ int timerdemo(int interval) {
 
 	timer_one_shot(3000, blink_leds);
 }
+
+void timerhandle(int interval) {
+    static bool timerRunning = false;
+
+    if (!timerRunning) {
+        timer_init(interval, blink_leds);
+        timerRunning = true;
+    } else {
+        timer_reset(interval);
+    }
+}
