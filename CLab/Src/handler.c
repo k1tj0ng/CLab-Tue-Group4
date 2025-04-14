@@ -9,7 +9,6 @@
 #include <string.h>
 #include <stdio.h>
 
-
 // Global variables (volatile for ISR safety)
 volatile uint16_t writePos = 0;       // Current write position
 volatile bool bufferReady = false;     // Data ready flag

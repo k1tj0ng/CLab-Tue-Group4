@@ -38,16 +38,23 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
+
 void finished_transmission(uint32_t bytes_sent);
 
+// Main set up for integration
 int main(void) {
-
+	// Initialize board at port USART1 with 115200 baud rate.
 	SerialInitialise(BAUD_115200, &USART1_PORT, &finished_transmission);
+
+	// Enable USART interrupt
 	UARTenableInterrupts();
+
+	// Enable GPIOE and TIM2 clock and and discovery board.
 	enable_clocks();
 	initialise_board();
 
 	for(;;) {
+		// if \n or \r detected, sort the input in integration.c.
 		if (bufferReady) {
 		        sortingOutInput((char (*)[BUFFER])strings, readyIndex);
 		        bufferReady = 0;

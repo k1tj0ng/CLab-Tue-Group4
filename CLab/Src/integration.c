@@ -9,9 +9,11 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 
-// Long int command handler
+// Numerical command handler
 void handleNumericCommand(const char* name, const char* value) {
+	// If no error display error message on the terminal
     if(value == NULL){
         char msg[BUFFER];
         sprintf(msg, "Error: %s needs value\n", name);
@@ -21,8 +23,10 @@ void handleNumericCommand(const char* name, const char* value) {
 
     char* endptr;
     long num = strtol(value, &endptr, 10);
+    int digits = snprintf(NULL, 0, "%ld", num);
 
-    if(*endptr != '\0' || num < 0) {
+    // If value is invalid, display error message otherwise continue.
+    if(*endptr != '\0' || num < 0 || digits > 8) {
         SerialOutputString((uint8_t*)"Error: Invalid number\n", &USART1_PORT);
     } else {
         char msg[BUFFER];
@@ -33,11 +37,13 @@ void handleNumericCommand(const char* name, const char* value) {
 
 // String command handler
 void handleSerial(const char* value) {
+	// If no input, display error message
     if(value == NULL) {
         SerialOutputString((uint8_t*)"Error: SERIAL needs string\n", &USART1_PORT);
         return;
     }
 
+    // If input is too long, display error message otherwise display input and continue.
     if(strlen(value) > BUFFER) {
         SerialOutputString((uint8_t*)"Error: Max 32 chars\n", &USART1_PORT);
     } else {
@@ -47,6 +53,7 @@ void handleSerial(const char* value) {
     }
 }
 
+// Integration function. Sorting output to needed function.
 void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
     char* input = buffers[bufIndex];
 
@@ -92,10 +99,6 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
             timer_reset(interval);
         }
     }
-    //else if(strcasecmp(command, "timer") == 0) {
-    //	handleNumericCommand("TIMER", value);
-    //	timerdemo(value);
-    //}
     else if(strcasecmp(command, "oneshot") == 0) {
     	handleNumericCommand("ONESHOT", value);
     	timer_one_shot(strtol(value, NULL, 10), blink_leds);
