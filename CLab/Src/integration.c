@@ -78,7 +78,9 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
     // Command processing
     if(strcasecmp(command, "led") == 0) {
         handleNumericCommand("LED", value);
-        set_led_state((uint16_t)value);
+        uint8_t bitmask = strtol(value, NULL, 2);
+        set_led_state(bitmask);
+        //set_led_state((uint16_t)value);
     }
     else if(strcasecmp(command, "timer") == 0) {
     	static bool timerRunning = false;
@@ -98,7 +100,8 @@ void sortingOutInput(char buffers[][BUFFER], uint8_t bufIndex) {
     //}
     else if(strcasecmp(command, "oneshot") == 0) {
     	handleNumericCommand("ONESHOT", value);
-    	timer_one_shot(strtol(value, NULL, 10), blink_leds);
+    	uint32_t delay = strtol(value, NULL, 10);
+    	timer_one_shot(delay, blink_leds);
     //	timer_one_shot(value, timerCallback);
     }
     else if(strcasecmp(command, "serial") == 0) {
