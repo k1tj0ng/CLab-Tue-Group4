@@ -76,19 +76,15 @@ void SerialInitialise(uint32_t baudRate, SerialPort *serial_port, void (*complet
 	// Baud rate calculation from datasheet
 	switch(baudRate){
 	case BAUD_9600:
-		// NEED TO FIX THIS !
 		*baud_rate_config = 0x46;  // 115200 at 8MHz
 		break;
 	case BAUD_19200:
-		// NEED TO FIX THIS !
 		*baud_rate_config = 0x46;  // 115200 at 8MHz
 		break;
 	case BAUD_38400:
-		// NEED TO FIX THIS !
 		*baud_rate_config = 0x46;  // 115200 at 8MHz
 		break;
 	case BAUD_57600:
-		// NEED TO FIX THIS !
 		*baud_rate_config = 0x46;  // 115200 at 8MHz
 		break;
 	case BAUD_115200:
