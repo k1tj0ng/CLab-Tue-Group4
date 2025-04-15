@@ -24,13 +24,13 @@ void button_press(void(*callback)(void)){
 void chase_led(){
 	uint8_t *led_register = ((uint8_t*)&(GPIOE->ODR)) + 1;
 
-	uint16_t GetLEDState(void);					//call get function
+
 
 	*led_register <<= 1;						//left shift pointer to LED
 	if (*led_register == 0) {					//if the end is not reached continue
 		*led_register = 1;
 	}
-	void SetLEDState(uint16_t state);			//call set function
+
 
 }
 
