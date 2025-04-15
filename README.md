@@ -749,6 +749,9 @@ void set_led_state(uint8_t state) {
 - Run Clab debug.
 - Open CuteCom and enter prompt in the terminal.
 
+***Special Functionality***:  
+Once the custom terminating character has been entered, the program will stop operating.
+
 ## Details About Testing Procedures
 **Troubleshooting**
 1. If no output is visible in the terminal after transmitting the string of characters: check if buffer being initialise properly, confirm CuteCom is configure correctly.
